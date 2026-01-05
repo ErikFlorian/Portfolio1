@@ -1,0 +1,8 @@
+.diplomas {
+    display: flex;
+    gap: 20px;
+}
+
+.diplomas .project-img-real {
+    width: 100%;
+}
