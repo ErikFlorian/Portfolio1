@@ -99,9 +99,34 @@ ul { line-height: 1.7; }
 }
 
 .project-img-real:hover {
-    transform: scale(1.03);
+    transform: scale(2);
 }
 
+.iplogger-discord {
+    width: 25%;
+    height: 75px;
+    object-fit: contain;
+    border: 8px;
+    transition: transform 0.3s ease; 
+}
+
+.iplogger-discord:hover {
+    transform: scale(2);
+}
+
+.project-img-iplogger {
+    width: 25%;
+    height: 55px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin: 10px 0;
+    transition: transform 0.3s ease;
+    padding-left: 370px;
+}
+
+.project-img-iplogger:hover {
+    transform: scale(2);
+}
 
 .tools-grid {
     display: grid;
@@ -151,7 +176,7 @@ footer {
 <h2>O mně</h2>
 <ul>
 <li>Jmenuji se <strong>Erik Florian</strong> a je mi 15 let.</li>
-<li>Zájmy: IT, divadlo a moderování, koloběžka, rubikovy kostky, letní sporty (cyklistika, treking, plavání), 3D tiskárkny</li>
+<li>Mezi mé zájmy patří: IT, divadlo a moderování, koloběžka, Rubikova kostka, letní sporty (cyklistika, hiking, plavání), 3D tiskárny</li>
 <li>Jsem komunikativní, energický a rád pracuji v kolektivu</li>
 </ul>
 </section>
@@ -192,7 +217,7 @@ footer {
 
 <div class="project-card">
 <h3>Kalkulačka v Pythonu (Tkinter)</h3>
-<img src="Snímek obrazovky 2026-01-05 161527.png" class="project-img-real" alt="Kalkulačka">
+<img src="Snímek obrazovky 2026-01-09 200653.png" class="project-img-real" alt="Kalkulačka">
 <ul>
 <li>Základní operace (+, -, ×, /)</li>
 <li>Oprava numerických chyb (ZeroDivisionError)</li>
@@ -200,6 +225,19 @@ footer {
 <li>Tlačítka pomocí lambda</li>
 <li>Podpora numerické klávesnice a početních operací</li>
 </ul>
+</div>
+<div class="project-card">
+<h3>IP Webhook</h3>
+<img src="Snímek obrazovky 2026-01-09 164015.png" class="project-img-real" alt="iplogger1">
+<img src="Snímek obrazovky 2026-01-09 164222.png" class="project-img-iplogger" alt="iplogger2">
+<img src="Snímek obrazovky 2026-01-09 165329.png" class="iplogger-discord" alt="iplogger3">
+ <ul>
+   <li>Používá modul "socket" a "discord webhook"</li>
+   <li>Je určen pouze pro interní síť</li>
+   <li>Získavá pouze hostname a adresu na síťi</li>
+   <li>Data posílá na discord server</li>
+ </ul>
+
 </div>
 
 <div class="project-card">
