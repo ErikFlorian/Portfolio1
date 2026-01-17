@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Portfolio — [Tvoje jméno]</title>
+  <meta name="description" content="Hackerské portfolio — originální, interaktivní, pro přijímačky na školu zaměřenou na programování a hacking." />
+  <style>
+    :root{
+      --bg:#071017;
+      --accent:#00ff9f;
+      --muted:#7af0c7;
+      --panel:rgba(0,0,0,0.45);
+      --glass:linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:radial-gradient(ellipse at 10% 10%, rgba(0,255,140,0.03), transparent 8%),
+                 radial-gradient(ellipse at 90% 90%, rgba(0,128,255,0.02), transparent 10%),
+                 var(--bg);
+      color:var(--muted);
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      overflow:hidden;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* matrix rain */
+    canvas#matrix{position:fixed;inset:0;z-index:0;opacity:0.18;filter:blur(0.4px)}
+
+    /* layout */
+    .frame{
+      position:relative;z-index:2;display:grid;grid-template-columns:320px 1fr;gap:22px;padding:32px;height:100vh;align-items:start;
+    }
+
+    /* left sidebar */
+    .sidebar{
+      background:var(--panel);backdrop-filter: blur(6px);border-radius:12px;padding:18px;min-height:calc(100vh - 64px);
+      border:1px solid rgba(0,255,159,0.05);box-shadow:0 10px 30px rgba(2,6,23,0.6);
+      overflow:auto;font-family:var(--mono);font-size:14px;color:var(--muted);
+    }
+    .logo{
+      display:flex;gap:12px;align-items:center;margin-bottom:14px
+    }
+    .logo .dot{width:12px;height:12px;border-radius:3px;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+    .logo h1{margin:0;font-size:18px;letter-spacing:1px}
+    .subtitle{color:rgba(122,240,199,0.7);font-size:12px;margin-top:4px}
+
+    nav.menu{margin-top:18px}
+    nav.menu button{
+      width:100%;text-align:left;padding:10px 12px;border-radius:8px;border:0;background:transparent;color:inherit;font-family:var(--mono);font-size:14px;cursor:pointer;margin-bottom:8px;display:flex;gap:10px;align-items:center
+    }
+    nav.menu button:hover{background:rgba(0,255,159,0.03)}
+    nav.menu button.active{background:linear-gradient(90deg, rgba(0,255,159,0.03), rgba(0,255,159,0.01));box-shadow:inset 0 0 20px rgba(0,255,159,0.02)}
+    .menu kbd{background:rgba(255,255,255,0.02);padding:4px 6px;border-radius:6px;font-size:11px;margin-left:auto}
+
+    .smallpanel{margin-top:12px;padding:10px;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.02)}
+    .p-title{font-size:13px;color:var(--muted);margin-bottom:6px}
+    .chip{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid rgba(0,255,159,0.06);background:rgba(0,0,0,0.18);font-family:var(--mono);font-size:12px;margin:4px}
+
+    /* main content */
+    .main{
+      height:calc(100vh - 64px);overflow:auto;padding:22px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));border:1px solid rgba(255,255,255,0.02);
+    }
+    .terminal-header{display:flex;gap:10px;align-items:center;margin-bottom:18px}
+    .dots{display:flex;gap:6px}
+    .dots .d{width:12px;height:12px;border-radius:999px;background:#333;opacity:0.6}
+    .d.close{background:#ff5f56}
+    .d.min{background:#ffbd2e}
+    .d.max{background:#27c93f}
+
+    .content{font-family:var(--mono);}
+    h2{margin:0 0 8px 0;font-family:var(--mono);letter-spacing:1px}
+    p.lead{color:rgba(122,240,199,0.9);margin-top:6px}
+
+    /* projects grid */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:14px}
+    .card{background:rgba(0,0,0,0.35);padding:12px;border-radius:8px;border:1px solid rgba(0,255,159,0.04);min-height:110px;display:flex;flex-direction:column;gap:8px}
+    .card h3{margin:0;font-family:var(--mono);font-size:15px}
+    .card p{margin:0;font-size:13px;color:rgba(122,240,199,0.85)}
+    .card .tags{margin-top:auto}
+
+    /* achievements list */
+    .ach-list{margin-top:12px}
+    .ach-item{padding:8px;border-radius:6px;background:rgba(0,0,0,0.22);margin-bottom:8px;border-left:3px solid rgba(0,255,159,0.08)}
+    .ach-item time{font-size:12px;color:rgba(122,240,199,0.6)}
+
+    /* contact */
+    .contact form{display:grid;gap:8px}
+    .contact input,.contact textarea{background:transparent;border:1px dashed rgba(255,255,255,0.04);padding:10px;border-radius:6px;color:var(--muted);font-family:var(--mono)}
+    .btn{display:inline-block;padding:10px 14px;border-radius:8px;background:transparent;border:1px solid rgba(0,255,159,0.15);cursor:pointer;font-family:var(--mono)}
+
+    /* typewriter */
+    .typewriter{font-family:var(--mono);font-size:18px;line-height:1.2}
+    .cursor{display:inline-block;width:10px;height:22px;background:var(--muted);margin-left:6px;animation:blink 1s steps(2) infinite}
+    @keyframes blink{50%{opacity:0}}
+
+    /* responsive */
+    @media (max-width:900px){
+      .frame{grid-template-columns:1fr;padding:18px}
+      .sidebar{order:2;min-height:auto}
+      .main{order:1}
+      canvas#matrix{opacity:0.08}
+    }
+
+    footer{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:12px;color:rgba(122,240,199,0.5)}
+
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+  <div class="frame">
+    <aside class="sidebar" aria-label="Boční menu">
+      <div class="logo">
+        <div class="dot" aria-hidden></div>
+        <div>
+          <h1 id="name">[Tvoje jméno]</h1>
+          <div class="subtitle">aspirující hacker • uchazeč na školu • programátor</div>
+        </div>
+      </div>
+
+      <nav class="menu" role="navigation" aria-label="Hlavní navigace">
+        <button data-target="about" class="active">❖ O mne <kbd>1</kbd></button>
+        <button data-target="projects">⧉ Moje projekty <kbd>2</kbd></button>
+        <button data-target="skills">▣ Dovednosti <kbd>3</kbd></button>
+        <button data-target="achievements">★ Úspěchy <kbd>4</kbd></button>
+        <button data-target="contact">✉ Kontakt <kbd>5</kbd></button>
+      </nav>
+
+      <div class="smallpanel">
+        <div class="p-title">Quick info</div>
+        <div class="chip">Python</div><div class="chip">C / C++</div><div class="chip">Javascript</div>
+        <div style="margin-top:8px;font-size:12px;color:rgba(122,240,199,0.6)">Status: <strong style="color:var(--accent)">ACTIVE</strong></div>
+      </div>
+
+      <div class="smallpanel" style="margin-top:12px">
+        <div class="p-title">Tip</div>
+        <div style="font-size:13px;color:rgba(122,240,199,0.7)">Klikni na sekce vlevo nebo stiskni číslo 1–5 pro rychlé přepínání.</div>
+      </div>
+    </aside>
+
+    <main class="main" role="main">
+      <div class="terminal-header">
+        <div class="dots"><span class="d close"></span><span class="d min"></span><span class="d max"></span></div>
+        <div style="flex:1"></div>
+        <div style="font-family:var(--mono);font-size:13px;color:rgba(122,240,199,0.6)">/root/portfolio — <span id="status">init</span></div>
+      </div>
+
+      <section id="about" class="content" data-section>
+        <h2>O mne</h2>
+        <div class="typewriter" id="intro"></div>
+        <p class="lead">Jsem student se zájmem o bezpečnost, programování a řešení problémů. Rád stavím nástroje, automatizuji a učím se způsoby, jak věci zefektivnit — eticky a zodpovědně.</p>
+
+        <div style="margin-top:14px">
+          <div class="p-title">Krátké CV</div>
+          <div class="ach-item"><strong>Škola:</strong> Gymnázium / IT směr — <time>2021–2025</time></div>
+          <div class="ach-item"><strong>Projekty:</strong> malé nástroje, weby, CTF úlohy</div>
+        </div>
+      </section>
+
+      <section id="projects" class="content" data-section hidden>
+        <h2>Moje projekty</h2>
+        <p class="lead">Zde jsou některé vybrané práce — klikni pro podrobnosti.</p>
+        <div class="grid" id="projects-grid">
+          <!-- Projektové kartičky budou vloženy přes JS -->
+        </div>
+      </section>
+
+      <section id="skills" class="content" data-section hidden>
+        <h2>Dovednosti</h2>
+        <p class="lead">Stack a nástroje, které používám.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
+          <div class="chip">Linux</div><div class="chip">Bash</div><div class="chip">Git</div><div class="chip">Wireshark</div>
+          <div class="chip">Docker</div><div class="chip">Web</div><div class="chip">SQL</div>
+        </div>
+      </section>
+
+      <section id="achievements" class="content" data-section hidden>
+        <h2>Úspěchy</h2>
+        <p class="lead">Seznam tvých úspěchů — přidej je sem postupně.</p>
+        <div class="ach-list" id="ach-list">
+          <div class="ach-item"><strong>Participation:</strong> CTF lokální soutěž — <time>2024-11-10</time></div>
+        </div>
+      </section>
+
+      <section id="contact" class="content contact" data-section hidden>
+        <h2>Kontakt</h2>
+        <p class="lead">Nech zprávu (tady se pošle email, ale v této šabloně je to jen demo).</p>
+        <form onsubmit="event.preventDefault();alert('Demo — odešli email přes backend.');">
+          <input placeholder="Jméno" required />
+          <input type="email" placeholder="Email" required />
+          <textarea placeholder="Zpráva" rows="5" required></textarea>
+          <div style="margin-top:8px"><button class="btn" type="submit">Odeslat</button></div>
+        </form>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>Tip: uprav hlavičku v <code>h1#name</code> a přidej projekty přes <code>projectsData</code> v JS.</footer>
+
+  <script>
+    // Matrix background
+    (function(){
+      const c=document.getElementById('matrix');const ctx=c.getContext('2d');
+      function resize(){c.width=innerWidth;c.height=innerHeight}
+      window.addEventListener('resize',resize);resize();
+      const cols=Math.floor(c.width/14);const ypos=new Array(cols).fill(0);
+      function draw(){ctx.fillStyle='rgba(0,0,0,0.05)';ctx.fillRect(0,0,c.width,c.height);
+        ctx.fillStyle='rgba(0,255,140,0.8)';ctx.font='12px '+getComputedStyle(document.body).fontFamily;
+        ypos.forEach((y,idx)=>{const text=String.fromCharCode(33+Math.random()*94);const x=idx*14;ctx.fillText(text,x,y);
+          if(y>100+Math.random()*10000) ypos[idx]=0; else ypos[idx]=y+14
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    // Simple SPA navigation
+    const buttons=document.querySelectorAll('nav.menu button');
+    const sections=document.querySelectorAll('[data-section]');
+    function show(id){sections.forEach(s=>{if(s.id===id){s.hidden=false}else s.hidden=true});
+      buttons.forEach(b=>b.classList.toggle('active',b.dataset.target===id));
+      document.getElementById('status').textContent = id;
+    }
+    buttons.forEach(b=>b.addEventListener('click',()=>show(b.dataset.target)));
+    // keyboard 1-5
+    window.addEventListener('keydown',e=>{if(e.key>='1'&&e.key<='5'){buttons[Number(e.key)-1].click()}});
+
+    // Typewriter intro
+    const introText = [
+      '> system booting...',
+      '> loading user profile',
+      "> Hello! I'm [Tvoje jméno] — aspiring coder & curious hacker.",
+      '> I build tools, solve puzzles and learn new tricks.'
+    ];
+    (function typeWriter(){
+      const el=document.getElementById('intro');let i=0, j=0, out='';
+      function step(){if(i>=introText.length) return; const line=introText[i];
+        if(j<line.length){out+=line[j++];el.textContent=out;setTimeout(step,30)}else{out+='\n';j=0;i++;setTimeout(step,450)}
+      }
+      step();
+    })();
+
+    // Projects data (edit/extend below)
+    const projectsData = [
+      {title:'Port scanner (tool)',desc:'Malý C++ port scanner – učil jsem se síťové knihovny',tags:['C++','Networking']},
+      {title:'Web dashboard',desc:'React-like dashboard pro sledování procesů (výukový projekt)',tags:['HTML','JS']},
+      {title:'CTF writeups',desc:'Sada writeupů z CTF soutěží, které jsem řešil',tags:['Security','Writeups']}
+    ];
+
+    const grid=document.getElementById('projects-grid');
+    function renderProjects(){grid.innerHTML='';projectsData.forEach((p,idx)=>{
+      const card=document.createElement('article');card.className='card';
+      card.innerHTML=`<h3>${p.title}</h3><p>${p.desc}</p><div class="tags">${p.tags.map(t=>'<span class="chip">'+t+'</span>').join('')}</div>`;
+      card.addEventListener('click',()=>{alert(p.title+' —\n'+p.desc+'\n\nTags: '+p.tags.join(', '));});
+      grid.appendChild(card);
+    })}
+    renderProjects();
+
+    // Achievements: helper to add items dynamically
+    function addAchievement(date,text){const list=document.getElementById('ach-list');const el=document.createElement('div');el.className='ach-item';el.innerHTML=`<strong>${text}</strong> — <time>${date}</time>`;list.prepend(el)}
+
+    // Simple instructions for editing via console
+    console.info('Portfolio loaded. Edit `projectsData`, `introText` and DOM elements to personalize.');
+
+  </script>
+</body>
+</html>

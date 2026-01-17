@@ -1,0 +1,4098 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Trenér - Cvičební Plány</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Nová neonová paleta */
+            --neon-pink: #FF006E;
+            --hyper-violet: #C400FF;
+            --sapphire-shock: #3A0CA3;
+            --electric-blue: #00BFFF;
+            --neon-green: #00FF6A;
+            --lime-yellow: #FFFF00;
+            --tangerine-boost: #FF6D00;
+            --fire-red: #FF1E1E;
+            --ice-white: #FFFFFF;
+            --dark-bg: #0D0D0D;
+            
+            /* Přídavné odstíny */
+            --dark-panel: #1A1A1A;
+            --gray-text: #B0B0B0;
+            --border-gray: #2A2A2A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--ice-white);
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            font-weight: 400;
+        }
+        
+        /* Charts & Graphs */
+        .progress-chart {
+            background: var(--dark-panel);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid var(--border-gray);
+        }
+        
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 200px;
+            margin-top: 20px;
+            padding: 0 10px;
+        }
+        
+        .bar {
+            flex: 1;
+            background: linear-gradient(to top, var(--neon-pink), var(--hyper-violet));
+            margin: 0 5px;
+            border-radius: 10px 10px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .bar:hover {
+            transform: scaleY(1.05);
+            filter: brightness(1.2);
+        }
+        
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: var(--gray-text);
+            white-space: nowrap;
+        }
+        
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18px;
+            color: var(--ice-white);
+        }
+        
+        .circular-progress {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            margin: 20px auto;
+        }
+        
+        .circular-progress svg {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-circle-bg {
+            fill: none;
+            stroke: var(--border-gray);
+            stroke-width: 12;
+        }
+        
+        .progress-circle {
+            fill: none;
+            stroke: url(#gradient);
+            stroke-width: 12;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.6s ease;
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 36px;
+            color: var(--ice-white);
+        }
+        
+        /* Line Chart */
+        .line-chart {
+            position: relative;
+            height: 250px;
+            margin: 20px 0;
+            padding: 20px;
+        }
+        
+        .line-chart-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .grid-line {
+            height: 1px;
+            background: var(--border-gray);
+            position: relative;
+        }
+        
+        .grid-value {
+            position: absolute;
+            left: -40px;
+            top: -8px;
+            font-size: 12px;
+            color: var(--gray-text);
+        }
+        
+        .line-chart svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .chart-line {
+            fill: none;
+            stroke: var(--neon-pink);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        
+        .chart-area {
+            fill: url(#lineGradient);
+            opacity: 0.3;
+        }
+        
+        .chart-point {
+            fill: var(--neon-pink);
+            stroke: var(--ice-white);
+            stroke-width: 2;
+            r: 6;
+            cursor: pointer;
+            transition: r 0.2s ease;
+        }
+        
+        .chart-point:hover {
+            r: 8;
+        }
+        
+        /* Area Chart pro kalorickou bilanci */
+        .area-positive {
+            fill: var(--neon-green);
+            opacity: 0.3;
+        }
+        
+        .area-negative {
+            fill: var(--neon-pink);
+            opacity: 0.3;
+        }
+        
+        .text-small {
+            font-size: 12px;
+            color: var(--gray-text);
+        }
+        
+        /* Area Chart */
+        .area-chart {
+            position: relative;
+            height: 200px;
+            margin: 20px 0;
+        }
+        
+        .area-positive {
+            fill: var(--neon-green);
+            opacity: 0.3;
+        }
+        
+        .area-negative {
+            fill: var(--fire-red);
+            opacity: 0.3;
+        }
+        
+        /* Pie Chart */
+        .pie-chart {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            position: relative;
+        }
+        
+        .pie-slice {
+            stroke: var(--dark-bg);
+            stroke-width: 2;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .pie-slice:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+        
+        /* Heatmap Calendar */
+        .heatmap-calendar {
+            display: grid;
+            grid-template-columns: 30px repeat(7, 1fr);
+            gap: 3px;
+            margin: 20px 0;
+        }
+        
+        .calendar-label {
+            font-size: 12px;
+            color: var(--gray-text);
+            text-align: center;
+            padding: 5px;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            background: var(--dark-panel);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .calendar-day[data-level="0"] { background: var(--dark-panel); }
+        .calendar-day[data-level="1"] { background: rgba(0, 255, 106, 0.2); }
+        .calendar-day[data-level="2"] { background: rgba(0, 255, 106, 0.4); }
+        .calendar-day[data-level="3"] { background: rgba(0, 255, 106, 0.6); }
+        .calendar-day[data-level="4"] { background: rgba(0, 255, 106, 0.8); }
+        .calendar-day[data-level="5"] { background: var(--neon-green); }
+        
+        .calendar-day:hover {
+            transform: scale(1.1);
+            border: 1px solid var(--neon-green);
+        }
+        
+        /* Chart Tooltips */
+        .chart-tooltip {
+            position: absolute;
+            background: var(--dark-panel);
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: var(--ice-white);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        /* Typography System */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Bebas Neue', Impact, sans-serif;
+            line-height: 1.2;
+            letter-spacing: 0.02em;
+            margin: 0;
+        }
+        
+        h1 {
+            font-size: 48px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        
+        h2 {
+            font-size: 36px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-bottom: 24px;
+        }
+        
+        h3 {
+            font-size: 28px;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            margin-bottom: 16px;
+        }
+        
+        h4 {
+            font-size: 22px;
+            font-weight: 400;
+            margin-bottom: 12px;
+        }
+        
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+        
+        .text-small {
+            font-size: 14px;
+            font-weight: 400;
+        }
+        
+        .text-bold {
+            font-weight: 600;
+        }
+        
+        .text-light {
+            font-weight: 300;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(247, 37, 133, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(114, 9, 183, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Main Layout */
+        .app-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--dark-panel);
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            padding: 20px 0;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5);
+            border-right: 1px solid var(--border-gray);
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 30px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-gray);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-header h1 {
+            font-size: 32px;
+            margin: 0;
+            background: linear-gradient(135deg, var(--neon-pink) 0%, var(--hyper-violet) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 20px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Responsive */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--dark-panel);
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            color: var(--ice-white);
+            font-size: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Sidebar Navigation */
+        .nav-tabs {
+            display: flex;
+            flex-direction: column;
+            padding: 0 15px;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--gray-text);
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            position: relative;
+            text-align: left;
+            width: 100%;
+            overflow: hidden;
+            letter-spacing: 0.01em;
+        }
+        
+        .nav-tab-icon {
+            font-size: 20px;
+            margin-right: 12px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--neon-pink) 0%, var(--hyper-violet) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-tab.active {
+            background: rgba(255, 0, 110, 0.1);
+            color: var(--ice-white);
+            font-weight: 600;
+            border-left: 4px solid var(--neon-pink);
+            padding-left: 16px;
+        }
+        
+        .nav-tab.active::before {
+            opacity: 1;
+        }
+        
+        .nav-tab.active .nav-tab-icon {
+            color: var(--neon-pink);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background-color: rgba(255, 0, 110, 0.05);
+            color: var(--ice-white);
+            transform: translateX(5px);
+        }
+
+        .nav-tab:active {
+            transform: scale(0.98);
+        }
+
+        .screen {
+            display: none;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .screen.active {
+            display: block;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        
+        /* Specifické styly pro analytics sekci */
+        #analytics {
+            padding: 20px;
+            min-height: 100vh;
+            background-color: var(--dark-bg);
+        }
+        
+        #analytics h2 {
+            color: var(--ice-white);
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+        
+        #analytics h3 {
+            color: var(--ice-white);
+            margin-bottom: 20px;
+        }
+
+        .screen.fade-out {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateX(30px) scale(0.95);
+            }
+            50% {
+                opacity: 0.8;
+                transform: translateX(10px) scale(0.98);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @keyframes slideOut {
+            0% {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-30px) scale(0.95);
+            }
+        }
+
+        .environment-selection {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 50px;
+            flex-wrap: wrap;
+        }
+
+        .env-card {
+            background: var(--dark-panel);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            min-width: 280px;
+            border: 1px solid var(--border-gray);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .env-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--neon-pink) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .env-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #333 0%, #555 100%);
+            z-index: -1;
+            margin: -1px;
+        }
+
+        .env-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            border-color: var(--neon-pink);
+        }
+        
+        .env-card:hover::after {
+            opacity: 0.1;
+        }
+
+        .env-card.selected {
+            background-color: var(--neon-green);
+            color: var(--ice-white);
+        }
+
+        .env-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .env-card h2 {
+            font-size: 32px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 12px;
+            color: var(--ice-white);
+        }
+        
+        .env-card p {
+            font-size: 15px;
+            font-weight: 400;
+            color: var(--gray-text);
+            line-height: 1.5;
+        }
+
+        .body-parts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .body-part {
+            background: linear-gradient(135deg, #1a0000 0%, #2a0000 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 15px rgba(255,0,0,0.2);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+
+        .body-part::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 15px;
+            background: linear-gradient(135deg, var(--fire-red) 0%, var(--tangerine-boost) 100%);
+            z-index: -1;
+            margin: -2px;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+
+        .body-part:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 8px 30px rgba(255,30,30,0.4);
+        }
+
+        .body-part:hover::before {
+            opacity: 1;
+        }
+
+        .body-part.selected {
+            background-color: var(--fire-red);
+            color: white;
+        }
+
+        .muscle-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        .exercise-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .exercise-card {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            cursor: move;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+
+        .exercise-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 15px;
+            background: linear-gradient(135deg, var(--fire-red) 0%, var(--tangerine-boost) 100%);
+            z-index: -1;
+            margin: -2px;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+        }
+
+        .exercise-card:hover::before {
+            opacity: 0.6;
+        }
+
+        .exercise-card.dragging {
+            opacity: 0.5;
+        }
+
+        .exercise-image {
+            width: 100%;
+            height: 200px;
+            background-color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: var(--fire-red);
+        }
+
+        .exercise-info {
+            padding: 20px;
+            background-color: #0a0a0a;
+        }
+
+        .exercise-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--fire-red);
+        }
+
+        .difficulty {
+            color: var(--fire-red);
+            margin-bottom: 10px;
+        }
+
+        .exercise-details {
+            color: var(--gray-text);
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-pink) 0%, var(--hyper-violet) 100%);
+            color: var(--ice-white);
+            border: none;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(247, 37, 133, 0.3);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(247, 37, 133, 0.4);
+            background: linear-gradient(135deg, var(--hyper-violet) 0%, var(--sapphire-shock) 100%);
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(247, 37, 133, 0.3);
+        }
+
+        .workout-plan {
+            background: linear-gradient(135deg, #1a1a1a 0%, #222 100%);
+            border-radius: 20px;
+            padding: 35px;
+            margin-top: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            border: 2px solid rgba(0, 255, 106, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workout-plan::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 106, 0.05) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.3; }
+        }
+
+        /* Barevné palety pro jednotlivé sekce */
+        
+        /* Carbon Steel - Domů */
+        #home {
+            background-color: var(--carbon-bg);
+            color: var(--carbon-text);
+        }
+        
+        #home .env-card {
+            background: linear-gradient(135deg, var(--carbon-primary) 0%, var(--carbon-secondary) 100%);
+            border-color: var(--carbon-accent);
+        }
+        
+        #home .env-card:hover {
+            border-color: var(--carbon-accent);
+            box-shadow: 0 10px 30px rgba(242, 78, 30, 0.3);
+        }
+        
+        #home .env-card.selected {
+            background: var(--carbon-accent);
+            color: var(--carbon-bg);
+        }
+
+        /* Midnight Focus - Cviky */
+        #exercises {
+            background-color: var(--midnight-bg);
+            color: var(--midnight-text);
+        }
+        
+        #exercises .body-part {
+            background: linear-gradient(135deg, var(--midnight-primary) 0%, var(--midnight-secondary) 100%);
+        }
+        
+        #exercises .body-part::before {
+            background: linear-gradient(135deg, var(--midnight-accent) 0%, #1476B3 100%);
+        }
+        
+        #exercises .body-part.selected {
+            background: var(--midnight-accent);
+            color: var(--midnight-primary);
+        }
+        
+        #exercises .exercise-card {
+            background: linear-gradient(135deg, var(--midnight-primary) 0%, var(--midnight-secondary) 100%);
+        }
+        
+        #exercises .exercise-card::before {
+            background: linear-gradient(135deg, var(--midnight-accent) 0%, #1476B3 100%);
+        }
+        
+        #exercises .exercise-name {
+            color: var(--midnight-accent);
+        }
+        
+        #exercises .btn-add-to-plan {
+            background: linear-gradient(135deg, var(--midnight-accent) 0%, #1476B3 100%);
+            color: var(--midnight-primary);
+        }
+        
+        #exercises .btn-video-link {
+            color: var(--midnight-accent);
+            border-color: var(--midnight-accent);
+        }
+        
+        #exercises .btn-video-link::before {
+            background-color: var(--midnight-accent);
+        }
+
+        /* Muscle Fuel - Tréninkový plán */
+        #plan {
+            background-color: var(--muscle-bg);
+            color: var(--muscle-text);
+        }
+        
+        #plan .workout-plan {
+            background: linear-gradient(135deg, var(--muscle-bg) 0%, #2A466E 100%);
+            border-color: var(--muscle-primary);
+        }
+        
+        #plan .workout-day {
+            border-left-color: var(--muscle-primary);
+        }
+        
+        #plan .workout-day h3 {
+            color: var(--muscle-primary);
+        }
+        
+        #plan .drop-zone {
+            background-color: rgba(29, 53, 87, 0.5);
+            border-color: var(--muscle-secondary);
+        }
+        
+        #plan .drop-zone.drag-over {
+            background-color: rgba(230, 57, 70, 0.2);
+            border-color: var(--muscle-primary);
+        }
+        
+        #plan .btn-primary {
+            background: linear-gradient(135deg, var(--muscle-primary) 0%, #B82E3A 100%);
+            color: var(--muscle-accent);
+        }
+
+        /* Clean & Strong - Výživa */
+        #nutrition {
+            background-color: var(--clean-bg);
+            color: var(--clean-text);
+        }
+        
+        #nutrition .nutrition-goals,
+        #nutrition .daily-timeline,
+        #nutrition .meal-card,
+        #nutrition .supplement-card {
+            background: linear-gradient(135deg, var(--clean-secondary) 0%, #E8E8E8 100%);
+            border: 2px solid var(--clean-primary);
+            color: var(--clean-text);
+        }
+        
+        #nutrition h3 {
+            color: var(--clean-primary);
+        }
+        
+        #nutrition .btn-primary {
+            background: linear-gradient(135deg, var(--clean-primary) 0%, #228577 100%);
+            color: var(--clean-secondary);
+        }
+        
+        #nutrition input,
+        #nutrition select {
+            background-color: var(--clean-secondary);
+            border-color: var(--clean-primary);
+            color: var(--clean-text);
+        }
+        
+        #nutrition input:focus,
+        #nutrition select:focus {
+            border-color: var(--clean-accent);
+            box-shadow: 0 0 10px rgba(233, 196, 106, 0.3);
+        }
+
+        /* Grit & Gains - Profil */
+        #profile {
+            background-color: var(--grit-bg);
+            color: var(--grit-text);
+        }
+        
+        #profile .profile-section {
+            background: linear-gradient(135deg, var(--grit-primary) 0%, var(--grit-secondary) 100%);
+            border-color: var(--grit-accent);
+        }
+        
+        #profile .form-group label {
+            color: var(--grit-accent);
+        }
+        
+        #profile input {
+            background-color: rgba(18, 18, 18, 0.8);
+            border-color: var(--grit-secondary);
+            color: var(--grit-text);
+        }
+        
+        #profile input:focus {
+            border-color: var(--grit-accent);
+            box-shadow: 0 0 10px rgba(255, 195, 0, 0.3);
+        }
+        
+        #profile .btn-primary {
+            background: linear-gradient(135deg, var(--grit-accent) 0%, #E6AC00 100%);
+            color: var(--grit-bg);
+        }
+        
+        #profile .plan-card {
+            background: linear-gradient(135deg, var(--grit-primary) 0%, var(--grit-secondary) 100%);
+            border-color: var(--grit-accent);
+        }
+
+        /* Produkty - Carbon Steel */
+        #products {
+            background-color: var(--carbon-bg);
+            color: var(--carbon-text);
+        }
+        
+        #products .supplement-card {
+            background: linear-gradient(135deg, var(--carbon-primary) 0%, var(--carbon-secondary) 100%);
+            border: 2px solid var(--carbon-accent);
+        }
+        
+        #products h3 {
+            color: var(--carbon-accent);
+        }
+        
+        #products .btn-video-link {
+            color: var(--carbon-accent);
+            border-color: var(--carbon-accent);
+        }
+        
+        #products .btn-video-link::before {
+            background-color: var(--carbon-accent);
+        }
+
+        .workout-day {
+            margin-bottom: 30px;
+            border-left: 4px solid var(--neon-green);
+            padding-left: 20px;
+        }
+
+        .workout-day h3 {
+            color: var(--neon-green);
+            margin-bottom: 15px;
+        }
+
+        .drop-zone {
+            min-height: 100px;
+            border: 2px dashed var(--border-gray);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            background-color: #0a0a0a;
+        }
+
+        .drop-zone.drag-over {
+            background-color: var(--sapphire-shock);
+            border-color: var(--neon-green);
+        }
+
+        .profile-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #222 100%);
+            border-radius: 20px;
+            padding: 35px;
+            margin-top: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            border: 2px solid rgba(0, 255, 106, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--neon-green);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            font-size: 16px;
+            background-color: rgba(10, 10, 10, 0.8);
+            color: var(--ice-white);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--neon-green);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .saved-plans {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .plan-card {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-gray);
+        }
+
+        @media (max-width: 768px) {
+            .environment-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .body-parts {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .exercise-list {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .nav-tab {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+        }
+
+        .filter-bar {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(255,255,255,0.1);
+            border: 1px solid #333;
+        }
+
+        .filter-bar select {
+            padding: 8px 15px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            margin-right: 10px;
+            background-color: #0a0a0a;
+            color: var(--ice-white);
+        }
+
+        .search-input {
+            padding: 8px 15px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            width: 200px;
+            background-color: #0a0a0a;
+            color: var(--ice-white);
+        }
+        .btn-add-to-plan {
+            background: linear-gradient(135deg, var(--fire-red) 0%, var(--tangerine-boost) 100%);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            width: 100%;
+            box-shadow: 0 3px 10px rgba(255, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-add-to-plan::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-add-to-plan:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+        }
+
+        .btn-add-to-plan:hover::before {
+            left: 100%;
+        }
+
+        .btn-add-to-plan:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+        }
+
+        .btn-video-link {
+            display: block;
+            background-color: transparent;
+            color: var(--neon-green);
+            border: 2px solid var(--neon-green);
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-video-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background-color: var(--neon-green);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn-video-link:hover {
+            color: var(--dark-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
+        }
+
+        .btn-video-link:hover::before {
+            left: 0;
+        }
+
+        .day-selector-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .day-selector-content {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 25px;
+            padding: 35px;
+            max-width: 400px;
+            width: 90%;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            animation: modalSlideIn 0.4s ease-out;
+            position: relative;
+        }
+
+        .day-selector-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 25px;
+            background: linear-gradient(135deg, var(--fire-red) 0%, var(--tangerine-boost) 100%);
+            z-index: -1;
+            margin: -2px;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px) scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .day-selector-content h3 {
+            color: var(--fire-red);
+            margin-bottom: 20px;
+        }
+
+        .day-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .day-btn {
+            background-color: var(--dark-bg);
+            color: var(--ice-white);
+            border: 1px solid var(--fire-red);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .day-btn:hover {
+            background-color: var(--fire-red);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .close-modal {
+            background-color: var(--border-gray);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            background-color: var(--gray-text);
+        }
+
+        /* Výživa styly */
+        .nutrition-goals {
+            background-color: #1a1a1a;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        .nutrition-goals h3 {
+            color: var(--neon-green);
+            margin-bottom: 20px;
+        }
+
+        .goal-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .daily-timeline {
+            background-color: #1a1a1a;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        .meal-slot {
+            background-color: #0a0a0a;
+            border: 1px solid var(--neon-green);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .meal-slot:hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 10px rgba(0,255,0,0.3);
+        }
+
+        .meal-slot h4 {
+            color: var(--neon-green);
+            margin-bottom: 10px;
+        }
+
+        .add-food-btn {
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .add-food-btn:hover {
+            background-color: var(--neon-green);
+            color: var(--dark-bg);
+        }
+
+        .macro-display {
+            display: flex;
+            justify-content: space-around;
+            background-color: #0a0a0a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .macro-item {
+            text-align: center;
+        }
+
+        .macro-item span:first-child {
+            display: block;
+            color: var(--gray-text);
+            font-size: 12px;
+        }
+
+        .macro-item span:last-child {
+            display: block;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .calories-progress {
+            background-color: #1a1a1a;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background-color: #0a0a0a;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-green) 0%, var(--electric-blue) 100%);
+            transition: width 0.5s ease;
+        }
+
+        .food-database {
+            background-color: #1a1a1a;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        .food-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .food-card {
+            background-color: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .food-card:hover {
+            border-color: var(--neon-green);
+            transform: translateY(-3px);
+        }
+
+        .food-card h5 {
+            color: var(--neon-green);
+            margin-bottom: 10px;
+        }
+
+        .recipe-builder {
+            background-color: #1a1a1a;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        .ingredient-list {
+            background-color: #0a0a0a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 100px;
+        }
+
+        .meal-planner-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .calendar-day {
+            background-color: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 10px;
+            min-height: 150px;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day:hover {
+            border-color: var(--neon-green);
+        }
+
+        .calendar-day h5 {
+            color: var(--neon-green);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .nutrition-stats {
+            background-color: #1a1a1a;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background-color: #0a0a0a;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            color: var(--neon-green);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--ice-white);
+        }
+        
+        /* Styly pro produkty */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .product-card {
+            background-color: #1a1a1a;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 3px 15px rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #333;
+            position: relative;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 25px rgba(0,255,0,0.2);
+            border-color: var(--neon-green);
+        }
+        
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--neon-green);
+            color: var(--dark-bg);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+        
+        .product-info {
+            padding: 20px;
+        }
+        
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--neon-green);
+        }
+        
+        .product-effects {
+            color: var(--gray-text);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--neon-green);
+            margin-bottom: 10px;
+        }
+        
+        .product-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .stars {
+            color: var(--lime-yellow);
+            margin-right: 10px;
+        }
+        
+        .rating-number {
+            color: #999;
+            font-size: 0.9rem;
+        }
+        
+        .btn-buy {
+            background-color: var(--neon-green);
+            color: var(--dark-bg);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-buy:hover {
+            background-color: var(--sapphire-shock);
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+    
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>💪 Fitness Trenér</h1>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active" onclick="showScreen('home')">
+                    <span class="nav-tab-icon">🏠</span>
+                    <span>Domů</span>
+                </button>
+                <button class="nav-tab" onclick="showScreen('exercises')">
+                    <span class="nav-tab-icon">🏋️</span>
+                    <span>Cviky</span>
+                </button>
+                <button class="nav-tab" onclick="showScreen('plan')">
+                    <span class="nav-tab-icon">📋</span>
+                    <span>Tréninkový plán</span>
+                </button>
+                <button class="nav-tab" onclick="showScreen('nutrition')">
+                    <span class="nav-tab-icon">🍎</span>
+                    <span>Výživa</span>
+                </button>
+                <button class="nav-tab" onclick="showScreen('profile')">
+                    <span class="nav-tab-icon">👤</span>
+                    <span>Profil</span>
+                </button>
+                <button class="nav-tab" onclick="showScreen('products')">
+                    <span class="nav-tab-icon">🏪</span>
+                    <span>Produkty</span>
+                </button>
+                <button class="nav-tab" onclick="showScreen('music')">
+                    <span class="nav-tab-icon">🎵</span>
+                    <span>Hudba</span>
+                </button>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+
+        <!-- Úvodní obrazovka -->
+        <div id="home" class="screen active">
+            <h2 style="text-align: center; margin: 30px 0; color: var(--electric-blue);">Vyberte si prostředí pro cvičení</h2>
+            <div class="environment-selection">
+                <div class="env-card" onclick="selectEnvironment('gym')">
+                    <div class="env-icon">🏋️</div>
+                    <h2>Posilovna</h2>
+                    <p>Kompletní vybavení pro profesionální trénink</p>
+                </div>
+                <div class="env-card" onclick="selectEnvironment('home')">
+                    <div class="env-icon">🏠</div>
+                    <h2>Domácí cvičení</h2>
+                    <p>Cviky s vlastní vahou nebo základním vybavením</p>
+                </div>
+            </div>
+
+            <div id="bodyPartSelection" style="display: none;">
+                <h2 style="text-align: center; margin: 40px 0 20px; color: var(--neon-pink);">Vyberte tělesnou partii</h2>
+                <div class="body-parts">
+                    <div class="body-part" onclick="selectBodyPart('chest')">
+                        <div class="muscle-icon">🫁</div>
+                        <h3>Hrudník</h3>
+                    </div>
+                    <div class="body-part" onclick="selectBodyPart('back')">
+                        <div class="muscle-icon">🔙</div>
+                        <h3>Záda</h3>
+                    </div>
+                    <div class="body-part" onclick="selectBodyPart('shoulders')">
+                        <div class="muscle-icon">💪</div>
+                        <h3>Ramena</h3>
+                    </div>
+                    <div class="body-part" onclick="selectBodyPart('arms')">
+                        <div class="muscle-icon">💪</div>
+                        <h3>Paže</h3>
+                    </div>
+                    <div class="body-part" onclick="selectBodyPart('abs')">
+                        <div class="muscle-icon">🎯</div>
+                        <h3>Břicho</h3>
+                    </div>
+                    <div class="body-part" onclick="selectBodyPart('legs')">
+                        <div class="muscle-icon">🦵</div>
+                        <h3>Nohy</h3>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="btn-primary" onclick="showExercises()">Zobrazit cviky</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seznam cviků -->
+        <div id="exercises" class="screen">
+            <h2 style="color: var(--neon-pink);">Databáze cviků</h2>
+            <div class="filter-bar">
+                <select id="filterBodyPart">
+                    <option value="">Všechny partie</option>
+                    <option value="chest">Hrudník</option>
+                    <option value="back">Záda</option>
+                    <option value="shoulders">Ramena</option>
+                    <option value="arms">Paže</option>
+                    <option value="abs">Břicho</option>
+                    <option value="legs">Nohy</option>
+                </select>
+                <select id="filterDifficulty">
+                    <option value="">Všechny obtížnosti</option>
+                    <option value="1">⭐</option>
+                    <option value="2">⭐⭐</option>
+                    <option value="3">⭐⭐⭐</option>
+                    <option value="4">⭐⭐⭐⭐</option>
+                    <option value="5">⭐⭐⭐⭐⭐</option>
+                </select>
+                <input type="text" class="search-input" placeholder="Hledat cvik..." id="searchExercise">
+            </div>
+            <div class="exercise-list" id="exerciseList"></div>
+        </div>
+
+        <!-- Tréninkový plán -->
+        <div id="plan" class="screen">
+            <h2 style="color: var(--electric-blue);">Vytvořte si tréninkový plán</h2>
+            <div class="workout-plan">
+                <div class="workout-day">
+                    <h3>Pondělí</h3>
+                    <div class="drop-zone" data-day="monday">
+                        <p style="color: var(--gray-text); text-align: center;">Přetáhněte sem cviky</p>
+                    </div>
+                </div>
+                <div class="workout-day">
+                    <h3>Středa</h3>
+                    <div class="drop-zone" data-day="wednesday">
+                        <p style="color: var(--gray-text); text-align: center;">Přetáhněte sem cviky</p>
+                    </div>
+                </div>
+                <div class="workout-day">
+                    <h3>Pátek</h3>
+                    <div class="drop-zone" data-day="friday">
+                        <p style="color: var(--gray-text); text-align: center;">Přetáhněte sem cviky</p>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <button class="btn-primary" onclick="savePlan()">Uložit plán</button>
+            </div>
+        </div>
+
+        <!-- Profil -->
+        <div id="profile" class="screen">
+            <h2 style="color: var(--electric-blue);">Můj profil</h2>
+            <div class="profile-section">
+                <div class="form-group">
+                    <label for="userName">Jméno:</label>
+                    <input type="text" id="userName" placeholder="Vaše jméno">
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">Email:</label>
+                    <input type="email" id="userEmail" placeholder="vas@email.cz">
+                </div>
+                <div class="form-group">
+                    <label for="userGoal">Cíl tréninku:</label>
+                    <select id="userGoal" style="width: 100%; padding: 10px; border: 1px solid var(--border-gray); border-radius: 5px; background-color: #0a0a0a; color: var(--ice-white);">
+                        <option value="strength">Síla</option>
+                        <option value="muscle">Objem svalů</option>
+                        <option value="endurance">Vytrvalost</option>
+                        <option value="weight-loss">Hubnutí</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="saveProfile()">Uložit profil</button>
+            </div>
+
+            <!-- Progress Charts -->
+            <h3 style="margin-top: 40px; color: var(--electric-blue);">Můj pokrok</h3>
+            
+            <!-- Týdenní aktivita -->
+            <div class="progress-chart">
+                <h4>Týdenní aktivita</h4>
+                <div class="bar-chart">
+                    <div class="bar" style="height: 70%">
+                        <span class="bar-value">3</span>
+                        <span class="bar-label">Po</span>
+                    </div>
+                    <div class="bar" style="height: 90%">
+                        <span class="bar-value">4</span>
+                        <span class="bar-label">Út</span>
+                    </div>
+                    <div class="bar" style="height: 60%">
+                        <span class="bar-value">2</span>
+                        <span class="bar-label">St</span>
+                    </div>
+                    <div class="bar" style="height: 100%">
+                        <span class="bar-value">5</span>
+                        <span class="bar-label">Čt</span>
+                    </div>
+                    <div class="bar" style="height: 80%">
+                        <span class="bar-value">4</span>
+                        <span class="bar-label">Pá</span>
+                    </div>
+                    <div class="bar" style="height: 40%; background: linear-gradient(to top, var(--neon-green), var(--electric-blue));">
+                        <span class="bar-value">2</span>
+                        <span class="bar-label">So</span>
+                    </div>
+                    <div class="bar" style="height: 20%; background: linear-gradient(to top, var(--gray-text), var(--border-gray));">
+                        <span class="bar-value">0</span>
+                        <span class="bar-label">Ne</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Kruhový progress -->
+            <div class="progress-chart" style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: space-around;">
+                <div style="text-align: center;">
+                    <h4>Týdenní cíl</h4>
+                    <div class="circular-progress">
+                        <svg width="150" height="150">
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:var(--neon-pink);stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:var(--hyper-violet);stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="75" cy="75" r="60" class="progress-circle-bg"></circle>
+                            <circle cx="75" cy="75" r="60" class="progress-circle" 
+                                stroke-dasharray="377" 
+                                stroke-dashoffset="94"></circle>
+                        </svg>
+                        <div class="progress-text">75%</div>
+                    </div>
+                    <p class="text-small">15 z 20 tréninků</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <h4>Měsíční progres</h4>
+                    <div class="circular-progress">
+                        <svg width="150" height="150">
+                            <circle cx="75" cy="75" r="60" class="progress-circle-bg"></circle>
+                            <circle cx="75" cy="75" r="60" class="progress-circle" 
+                                stroke="var(--neon-green)"
+                                stroke-dasharray="377" 
+                                stroke-dashoffset="151"></circle>
+                        </svg>
+                        <div class="progress-text">60%</div>
+                    </div>
+                    <p class="text-small">+2.5 kg svalové hmoty</p>
+                </div>
+            </div>
+            
+            <!-- Svalový růst - přesunuto z Analytiky -->
+            <div class="progress-chart">
+                <h3>📊 Svalový růst – měsíční projekce</h3>
+                
+                <!-- Ovládací panel -->
+                <div style="background: rgba(0,0,0,0.3); border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="display: block; color: var(--gray-text); font-size: 14px; margin-bottom: 5px;">
+                                Kolikrát týdně cvičíte?
+                            </label>
+                            <input type="range" id="workoutFrequency" min="0" max="7" value="3" 
+                                style="width: 100%; accent-color: var(--neon-pink);">
+                            <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                                <span class="text-small">0x</span>
+                                <span id="frequencyDisplay" style="color: var(--neon-pink); font-weight: bold;">3x týdně</span>
+                                <span class="text-small">7x</span>
+                            </div>
+                        </div>
+                        
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="display: block; color: var(--gray-text); font-size: 14px; margin-bottom: 5px;">
+                                Příjem bílkovin
+                            </label>
+                            <select id="proteinIntake" style="width: 100%; padding: 8px; background: var(--dark-bg); color: var(--ice-white); border: 1px solid var(--border-gray); border-radius: 5px;">
+                                <option value="low">Nízký (< 1g/kg)</option>
+                                <option value="moderate" selected>Střední (1-1.5g/kg)</option>
+                                <option value="high">Vysoký (> 1.5g/kg)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="line-chart" id="muscleGrowthChart">
+                    <div class="line-chart-grid">
+                        <div class="grid-line"><span class="grid-value">+2.0 kg</span></div>
+                        <div class="grid-line"><span class="grid-value">+1.5 kg</span></div>
+                        <div class="grid-line"><span class="grid-value">+1.0 kg</span></div>
+                        <div class="grid-line"><span class="grid-value">+0.5 kg</span></div>
+                        <div class="grid-line"><span class="grid-value">0 kg</span></div>
+                    </div>
+                    <svg viewBox="0 0 300 200" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:var(--neon-pink);stop-opacity:0.8" />
+                                <stop offset="100%" style="stop-color:var(--neon-pink);stop-opacity:0.1" />
+                            </linearGradient>
+                        </defs>
+                        <path class="chart-area" d="M 0,200 L 0,160 L 100,140 L 200,110 L 300,85 L 300,200 Z" />
+                        <path class="chart-line" d="M 0,160 L 100,140 L 200,110 L 300,85" />
+                        <circle class="chart-point" cx="0" cy="160" />
+                        <circle class="chart-point" cx="100" cy="140" />
+                        <circle class="chart-point" cx="200" cy="110" />
+                        <circle class="chart-point" cx="300" cy="85" />
+                    </svg>
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                        <span class="text-small">1. týden</span>
+                        <span class="text-small">2. týden</span>
+                        <span class="text-small">3. týden</span>
+                        <span class="text-small">4. týden</span>
+                    </div>
+                </div>
+                <p id="growthSummary" class="text-small" style="text-align: center; color: var(--gray-text); margin-top: 10px;">
+                    Při 3x týdně tréninku a středním příjmu bílkovin můžete nabrat až 1.3 kg svalové hmoty za měsíc
+                </p>
+            </div>
+            
+            <h3 style="margin-top: 40px; color: var(--electric-blue);">Moje tréninkové plány</h3>
+            <div class="saved-plans" id="savedPlans">
+                <p style="color: var(--gray-text);">Zatím nemáte žádné uložené plány</p>
+            </div>
+        </div>
+
+        <!-- Výživa -->
+        <div id="nutrition" class="screen">
+            <h2 style="color: var(--electric-blue);">Výživa a stravování</h2>
+            
+            <!-- Nastavení cílů -->
+            <div class="nutrition-goals">
+                <h3>Nastavení výživových cílů</h3>
+                <div class="goal-form">
+                    <div class="form-group">
+                        <label for="nutritionGoal">Cíl:</label>
+                        <select id="nutritionGoal" style="width: 100%; padding: 10px; border: 1px solid var(--border-gray); border-radius: 5px; background-color: #0a0a0a; color: var(--ice-white);">
+                            <option value="loss">Hubnutí</option>
+                            <option value="maintain">Udržování</option>
+                            <option value="gain">Nabírání</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityLevel">Aktivita:</label>
+                        <select id="activityLevel" style="width: 100%; padding: 10px; border: 1px solid var(--border-gray); border-radius: 5px; background-color: #0a0a0a; color: var(--ice-white);">
+                            <option value="sedentary">Sedavý způsob</option>
+                            <option value="light">Mírně aktivní</option>
+                            <option value="moderate">Středně aktivní</option>
+                            <option value="active">Velmi aktivní</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Pohlaví:</label>
+                        <select id="gender" style="width: 100%; padding: 10px; border: 1px solid var(--border-gray); border-radius: 5px; background-color: #0a0a0a; color: var(--ice-white);">
+                            <option value="male">Muž</option>
+                            <option value="female">Žena</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Věk:</label>
+                        <input type="number" id="age" placeholder="25" min="15" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Výška (cm):</label>
+                        <input type="number" id="height" placeholder="175" min="100" max="250">
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Váha (kg):</label>
+                        <input type="number" id="weight" placeholder="70" min="30" max="300">
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="calculateNutritionGoals()">Vypočítat cíle</button>
+                
+                <div id="calculatedGoals" style="display: none; margin-top: 20px;">
+                    <h4 style="color: var(--electric-blue);">Vaše denní cíle:</h4>
+                    <div class="macro-display">
+                        <div class="macro-item">
+                            <span>Kalorie</span>
+                            <span id="targetCalories" style="color: var(--electric-blue);">2000</span>
+                        </div>
+                        <div class="macro-item">
+                            <span>Bílkoviny</span>
+                            <span id="targetProtein" style="color: var(--neon-pink);">150g</span>
+                        </div>
+                        <div class="macro-item">
+                            <span>Sacharidy</span>
+                            <span id="targetCarbs" style="color: var(--lime-yellow);">200g</span>
+                        </div>
+                        <div class="macro-item">
+                            <span>Tuky</span>
+                            <span id="targetFats" style="color: #ff9900;">67g</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Denní přehled -->
+            <div class="calories-progress">
+                <h3 style="color: var(--electric-blue); margin-bottom: 15px;">Dnešní příjem</h3>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>0 kcal</span>
+                    <span id="dailyCalorieGoal">2000 kcal</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%;"></div>
+                </div>
+                <div class="macro-display" style="margin-top: 20px;">
+                    <div class="macro-item">
+                        <span>Bílkoviny</span>
+                        <span id="currentProtein" style="color: var(--neon-pink);">0g / 150g</span>
+                    </div>
+                    <div class="macro-item">
+                        <span>Sacharidy</span>
+                        <span id="currentCarbs" style="color: var(--lime-yellow);">0g / 200g</span>
+                    </div>
+                    <div class="macro-item">
+                        <span>Tuky</span>
+                        <span id="currentFats" style="color: #ff9900;">0g / 67g</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Denní jídelníček -->
+            <div class="daily-timeline">
+                <h3 style="color: var(--electric-blue); margin-bottom: 20px;">Dnešní jídelníček</h3>
+                
+                <div class="meal-slot" data-meal="breakfast">
+                    <h4>🌅 Snídaně</h4>
+                    <div class="meal-items" id="breakfast-items">
+                        <p style="color: var(--gray-text);">Zatím prázdné</p>
+                    </div>
+                    <button class="add-food-btn" onclick="openFoodModal('breakfast')">+ Přidat jídlo</button>
+                </div>
+
+                <div class="meal-slot" data-meal="snack1">
+                    <h4>🥜 Dopolední svačina</h4>
+                    <div class="meal-items" id="snack1-items">
+                        <p style="color: var(--gray-text);">Zatím prázdné</p>
+                    </div>
+                    <button class="add-food-btn" onclick="openFoodModal('snack1')">+ Přidat jídlo</button>
+                </div>
+
+                <div class="meal-slot" data-meal="lunch">
+                    <h4>🍽️ Oběd</h4>
+                    <div class="meal-items" id="lunch-items">
+                        <p style="color: var(--gray-text);">Zatím prázdné</p>
+                    </div>
+                    <button class="add-food-btn" onclick="openFoodModal('lunch')">+ Přidat jídlo</button>
+                </div>
+
+                <div class="meal-slot" data-meal="snack2">
+                    <h4>🍎 Odpolední svačina</h4>
+                    <div class="meal-items" id="snack2-items">
+                        <p style="color: var(--gray-text);">Zatím prázdné</p>
+                    </div>
+                    <button class="add-food-btn" onclick="openFoodModal('snack2')">+ Přidat jídlo</button>
+                </div>
+
+                <div class="meal-slot" data-meal="dinner">
+                    <h4>🌙 Večeře</h4>
+                    <div class="meal-items" id="dinner-items">
+                        <p style="color: var(--gray-text);">Zatím prázdné</p>
+                    </div>
+                    <button class="add-food-btn" onclick="openFoodModal('dinner')">+ Přidat jídlo</button>
+                </div>
+            </div>
+
+            <!-- Databáze potravin -->
+            <div class="food-database">
+                <h3 style="color: var(--electric-blue);">Databáze potravin</h3>
+                <div class="filter-bar">
+                    <input type="text" class="search-input" placeholder="Hledat potravinu..." id="searchFood">
+                    <select id="filterFoodCategory">
+                        <option value="">Všechny kategorie</option>
+                        <option value="protein">Bílkoviny</option>
+                        <option value="carbs">Sacharidy</option>
+                        <option value="fats">Tuky</option>
+                        <option value="vegetables">Zelenina</option>
+                        <option value="fruits">Ovoce</option>
+                        <option value="dairy">Mléčné výrobky</option>
+                    </select>
+                </div>
+                <div class="food-grid" id="foodGrid">
+                    <!-- Potraviny se načtou dynamicky -->
+                </div>
+            </div>
+
+            <!-- Vlastní recepty -->
+            <div class="recipe-builder">
+                <h3 style="color: var(--electric-blue);">Vytvořit vlastní recept</h3>
+                <div class="form-group">
+                    <label for="recipeName">Název receptu:</label>
+                    <input type="text" id="recipeName" placeholder="Např. Proteinové palačinky">
+                </div>
+                <div class="ingredient-list">
+                    <h4 style="color: var(--electric-blue); margin-bottom: 15px;">Suroviny</h4>
+                    <div id="ingredientsList">
+                        <p style="color: var(--gray-text);">Přidejte suroviny z databáze</p>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="saveRecipe()">Uložit recept</button>
+            </div>
+
+            <!-- Týdenní plán -->
+            <div class="nutrition-stats">
+                <h3 style="color: var(--electric-blue);">Týdenní plán jídel</h3>
+                <div class="meal-planner-calendar">
+                    <div class="calendar-day">
+                        <h5>Pondělí</h5>
+                        <div class="day-meals"></div>
+                    </div>
+                    <div class="calendar-day">
+                        <h5>Úterý</h5>
+                        <div class="day-meals"></div>
+                    </div>
+                    <div class="calendar-day">
+                        <h5>Středa</h5>
+                        <div class="day-meals"></div>
+                    </div>
+                    <div class="calendar-day">
+                        <h5>Čtvrtek</h5>
+                        <div class="day-meals"></div>
+                    </div>
+                    <div class="calendar-day">
+                        <h5>Pátek</h5>
+                        <div class="day-meals"></div>
+                    </div>
+                    <div class="calendar-day">
+                        <h5>Sobota</h5>
+                        <div class="day-meals"></div>
+                    </div>
+                    <div class="calendar-day">
+                        <h5>Neděle</h5>
+                        <div class="day-meals"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiky -->
+            <div class="nutrition-stats">
+                <h3 style="color: var(--electric-blue);">Statistiky výživy</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4>Průměrný příjem</h4>
+                        <div class="stat-value">2150</div>
+                        <span style="color: var(--gray-text);">kcal/den</span>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Týdenní průměr</h4>
+                        <div class="stat-value">15050</div>
+                        <span style="color: var(--gray-text);">kcal</span>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Nejčastější jídlo</h4>
+                        <div class="stat-value" style="font-size: 20px;">Kuřecí prsa</div>
+                        <span style="color: var(--gray-text);">12x tento týden</span>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Průměr bílkovin</h4>
+                        <div class="stat-value">142g</div>
+                        <span style="color: var(--gray-text);">denně</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Produkty -->
+        <div id="products" class="screen">
+            <h2 style="color: var(--electric-blue);">Fitness produkty a suplementy</h2>
+            
+            <!-- Filtry produktů -->
+            <div class="filter-bar">
+                <select id="filterProductCategory" onchange="displayProducts()">
+                    <option value="">Všechny kategorie</option>
+                    <option value="muscle-growth">Růst svalů</option>
+                    <option value="regeneration">Regenerace</option>
+                    <option value="energy">Energie a výkon</option>
+                    <option value="vitamins">Vitamíny a minerály</option>
+                    <option value="protein">Proteiny</option>
+                    <option value="amino">Aminokyseliny</option>
+                </select>
+                <select id="filterProductPrice" onchange="displayProducts()">
+                    <option value="">Všechny ceny</option>
+                    <option value="0-200">Do 200 Kč</option>
+                    <option value="200-500">200-500 Kč</option>
+                    <option value="500+">Nad 500 Kč</option>
+                </select>
+                <input type="text" class="search-input" placeholder="Hledat produkt..." id="searchProduct" onkeyup="displayProducts()">
+            </div>
+            
+            <!-- Grid produktů -->
+            <div class="product-grid" id="productGrid">
+                <!-- Produkty se načtou dynamicky -->
+            </div>
+            
+            <!-- Informační sekce -->
+            <div class="nutrition-stats" style="margin-top: 40px;">
+                <h3 style="color: var(--electric-blue);">Jak vybrat správný suplement?</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4>Pro začátečníky</h4>
+                        <p style="color: var(--gray-text); font-size: 14px; margin-top: 10px;">
+                            Začněte s kvalitním proteinem a kreatinem. Tyto základní suplementy vám pomohou v růstu svalů a regeneraci.
+                        </p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Pro pokročilé</h4>
+                        <p style="color: var(--gray-text); font-size: 14px; margin-top: 10px;">
+                            Přidejte BCAA nebo EAA pro lepší regeneraci, pre-workout pro více energie a vitamíny pro celkové zdraví.
+                        </p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Timing užívání</h4>
+                        <p style="color: var(--gray-text); font-size: 14px; margin-top: 10px;">
+                            Protein po tréninku, kreatin kdykoliv během dne, pre-workout 30 min před tréninkem.
+                        </p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Důležité upozornění</h4>
+                        <p style="color: var(--gray-text); font-size: 14px; margin-top: 10px;">
+                            Suplementy jsou doplňky stravy. Základem je vyvážená strava a pravidelný trénink.
+                        </p>
+                    </div>
+                </div>
+        </div>
+        
+        <!-- Hudba -->
+        <div id="music" class="screen">
+            <h2 style="color: var(--electric-blue);">Motivační hudba pro trénink</h2>
+            
+            <div class="music-section" style="background: var(--dark-panel); border-radius: 20px; padding: 40px; margin-top: 30px; text-align: center; border: 1px solid var(--border-gray);">
+                <h3 style="color: var(--neon-green); margin-bottom: 20px;">🎵 Ultimate Workout Playlist 2024</h3>
+                <p style="color: var(--gray-text); margin-bottom: 30px;">
+                    Pečlivě vybraná kolekce nejlepších motivačních skladeb pro váš trénink. 
+                    Obsahuje energické beaty, které vás poženou k maximálnímu výkonu!
+                </p>
+                
+                <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px 25px; border-radius: 10px;">
+                        <span style="color: var(--electric-blue); font-size: 24px; font-weight: bold;">150+</span>
+                        <p style="color: var(--gray-text); font-size: 14px; margin: 0;">skladeb</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px 25px; border-radius: 10px;">
+                        <span style="color: var(--neon-pink); font-size: 24px; font-weight: bold;">8h 30min</span>
+                        <p style="color: var(--gray-text); font-size: 14px; margin: 0;">celková délka</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px 25px; border-radius: 10px;">
+                        <span style="color: var(--lime-yellow); font-size: 24px; font-weight: bold;">2024</span>
+                        <p style="color: var(--gray-text); font-size: 14px; margin: 0;">aktualizováno</p>
+                    </div>
+                </div>
+                
+                <a href="https://open.spotify.com/playlist/37i9dQZF1DX70RN3TfWWJh" 
+                   target="_blank" 
+                   class="btn-primary" 
+                   style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; background: linear-gradient(135deg, #1DB954 0%, #1ED760 100%); padding: 20px 40px; font-size: 18px;">
+                    <span style="font-size: 24px;">🎧</span>
+                    Poslouchat na Spotify
+                </a>
+                
+                <div style="margin-top: 40px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 15px;">
+                    <h4 style="color: var(--electric-blue); margin-bottom: 15px;">Co najdete v playlistu:</h4>
+                    <ul style="text-align: left; max-width: 600px; margin: 0 auto; color: var(--gray-text); list-style: none;">
+                        <li style="margin-bottom: 10px;">✓ Motivační hip-hop a rap pro silový trénink</li>
+                        <li style="margin-bottom: 10px;">✓ Energické EDM pro kardio a HIIT</li>
+                        <li style="margin-bottom: 10px;">✓ Rock a metal pro intenzivní sety</li>
+                        <li style="margin-bottom: 10px;">✓ Drum & Bass pro rychlé tempo</li>
+                        <li style="margin-bottom: 10px;">✓ Motivační citáty a speeche mezi skladbami</li>
+                    </ul>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: rgba(255, 0, 110, 0.1); border-radius: 15px; border: 1px solid var(--neon-pink);">
+                    <p style="color: var(--ice-white); font-size: 16px; margin: 0;">
+                        💡 <strong>Tip:</strong> Pro nejlepší zážitek použijte kvalitní sluchátka nebo reproduktory. 
+                        Hudba je důležitou součástí motivace při tréninku!
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Další playlisty -->
+            <div style="margin-top: 40px;">
+                <h3 style="color: var(--electric-blue); margin-bottom: 20px;">Další doporučené playlisty</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="background: var(--dark-panel); border-radius: 15px; padding: 25px; border: 1px solid var(--border-gray);">
+                        <h4 style="color: var(--neon-green); margin-bottom: 10px;">🧘‍♀️ Yoga & Stretching</h4>
+                        <p style="color: var(--gray-text); font-size: 14px; margin-bottom: 15px;">
+                            Klidná hudba pro jógu, strečink a regeneraci. Pomáhá při relaxaci a zklidnění mysli.
+                        </p>
+                        <a href="https://open.spotify.com/playlist/37i9dQZF1DX9uKNf5jGX6m" 
+                           target="_blank" 
+                           style="color: var(--electric-blue); text-decoration: none; font-weight: bold;">
+                           → Otevřít playlist
+                        </a>
+                    </div>
+                    
+                    <div style="background: var(--dark-panel); border-radius: 15px; padding: 25px; border: 1px solid var(--border-gray);">
+                        <h4 style="color: var(--neon-pink); margin-bottom: 10px;">🏃‍♂️ Running Beats</h4>
+                        <p style="color: var(--gray-text); font-size: 14px; margin-bottom: 15px;">
+                            Perfektní tempo pro běh a kardio trénink. BPM přizpůsobené běžeckému rytmu.
+                        </p>
+                        <a href="https://open.spotify.com/playlist/37i9dQZF1DXadOVCgGhS7j" 
+                           target="_blank" 
+                           style="color: var(--electric-blue); text-decoration: none; font-weight: bold;">
+                           → Otevřít playlist
+                        </a>
+                    </div>
+                    
+                    <div style="background: var(--dark-panel); border-radius: 15px; padding: 25px; border: 1px solid var(--border-gray);">
+                        <h4 style="color: var(--lime-yellow); margin-bottom: 10px;">💪 Beast Mode</h4>
+                        <p style="color: var(--gray-text); font-size: 14px; margin-bottom: 15px;">
+                            Extrémně motivační hudba pro nejtěžší tréninky. Když potřebujete překonat své limity.
+                        </p>
+                        <a href="https://open.spotify.com/playlist/37i9dQZF1DX76Wlfdnj7AP" 
+                           target="_blank" 
+                           style="color: var(--electric-blue); text-decoration: none; font-weight: bold;">
+                           → Otevřít playlist
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    </div>
+
+    <!-- Modal pro výběr dne -->
+    <div id="daySelectorModal" class="day-selector-modal">
+        <div class="day-selector-content">
+            <h3>Vyberte den pro přidání cviku</h3>
+            <div class="day-buttons">
+                <button class="day-btn" onclick="addExerciseToDay('monday')">Pondělí</button>
+                <button class="day-btn" onclick="addExerciseToDay('wednesday')">Středa</button>
+                <button class="day-btn" onclick="addExerciseToDay('friday')">Pátek</button>
+            </div>
+            <button class="close-modal" onclick="closeDaySelector()">Zrušit</button>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar for mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+        
+        // Databáze cviků
+        const exercises = {
+            gym: {
+                chest: [
+                    { id: 1, name: "Bench press s činkou", difficulty: 4, sets: "4x8-10", equipment: "Činka, lavice", muscle: "Velký prsní sval" },
+                    { id: 2, name: "Tlaky s jednoručkami", difficulty: 3, sets: "3x10-12", equipment: "Jednoručky, lavice", muscle: "Prsní svaly" },
+                    { id: 3, name: "Rozpažování s činkami", difficulty: 2, sets: "3x12-15", equipment: "Jednoručky, lavice", muscle: "Prsní svaly" },
+                    { id: 4, name: "Tlaky na stroji", difficulty: 2, sets: "3x12-15", equipment: "Prsní stroj", muscle: "Prsní svaly" }
+                ],
+                back: [
+                    { id: 5, name: "Mrtvý tah", difficulty: 5, sets: "4x6-8", equipment: "Činka", muscle: "Široký sval zádový, vzpřimovače" },
+                    { id: 6, name: "Shyby nadhmatem", difficulty: 4, sets: "3x8-12", equipment: "Hrazda", muscle: "Široký sval zádový" },
+                    { id: 7, name: "Veslování s činkou", difficulty: 3, sets: "4x10-12", equipment: "Činka", muscle: "Střední záda" },
+                    { id: 8, name: "Stahování kladky", difficulty: 2, sets: "3x12-15", equipment: "Kladka", muscle: "Široký sval zádový" }
+                ],
+                shoulders: [
+                    { id: 9, name: "Tlaky s činkou nad hlavu", difficulty: 4, sets: "4x8-10", equipment: "Činka", muscle: "Deltový sval" },
+                    { id: 10, name: "Upažování s jednoručkami", difficulty: 2, sets: "3x12-15", equipment: "Jednoručky", muscle: "Střední deltový" },
+                    { id: 11, name: "Přední přednožování", difficulty: 2, sets: "3x12-15", equipment: "Jednoručky", muscle: "Přední deltový" },
+                    { id: 12, name: "Zadní rozpažování", difficulty: 3, sets: "3x12-15", equipment: "Jednoručky", muscle: "Zadní deltový" }
+                ],
+                arms: [
+                    { id: 13, name: "Bicepsový zdvih s činkou", difficulty: 2, sets: "3x10-12", equipment: "Činka", muscle: "Biceps" },
+                    { id: 14, name: "Hammer curls", difficulty: 2, sets: "3x12-15", equipment: "Jednoručky", muscle: "Biceps, předloktí" },
+                    { id: 15, name: "Tricepsové tlaky", difficulty: 3, sets: "3x10-12", equipment: "Činka, lavice", muscle: "Triceps" },
+                    { id: 16, name: "Stahování lana na triceps", difficulty: 2, sets: "3x12-15", equipment: "Kladka", muscle: "Triceps" }
+                ],
+                abs: [
+                    { id: 17, name: "Sedy-lehy na šikmé lavici", difficulty: 3, sets: "3x15-20", equipment: "Šikmá lavice", muscle: "Přímý břišní" },
+                    { id: 18, name: "Přednožování ve visu", difficulty: 4, sets: "3x10-15", equipment: "Hrazda", muscle: "Dolní břišní" },
+                    { id: 19, name: "Russian twist s medicinbalem", difficulty: 3, sets: "3x20-30", equipment: "Medicinbal", muscle: "Šikmé břišní" },
+                    { id: 20, name: "Plank s kotouči", difficulty: 4, sets: "3x30-60s", equipment: "Kotouč", muscle: "Core" }
+                ],
+                legs: [
+                    { id: 21, name: "Dřepy s činkou", difficulty: 5, sets: "4x8-10", equipment: "Činka", muscle: "Kvadriceps, hýždě" },
+                    { id: 22, name: "Leg press", difficulty: 3, sets: "4x12-15", equipment: "Leg press stroj", muscle: "Kvadriceps, hýždě" },
+                    { id: 23, name: "Rumunský mrtvý tah", difficulty: 4, sets: "3x10-12", equipment: "Činka", muscle: "Hamstringy, hýždě" },
+                    { id: 24, name: "Výpony na lýtka", difficulty: 2, sets: "4x15-20", equipment: "Stroj na lýtka", muscle: "Lýtka" }
+                ]
+            },
+            home: {
+                chest: [
+                    { id: 25, name: "Kliky", difficulty: 2, sets: "3x15-20", equipment: "Vlastní váha", muscle: "Prsní svaly" },
+                    { id: 26, name: "Diamantové kliky", difficulty: 4, sets: "3x8-12", equipment: "Vlastní váha", muscle: "Prsní svaly, triceps" },
+                    { id: 27, name: "Kliky se zvýšenýma nohama", difficulty: 3, sets: "3x12-15", equipment: "Židle/pohovka", muscle: "Horní prsní" },
+                    { id: 28, name: "Široké kliky", difficulty: 2, sets: "3x15-20", equipment: "Vlastní váha", muscle: "Vnější prsní" }
+                ],
+                back: [
+                    { id: 29, name: "Supermany", difficulty: 1, sets: "3x15-20", equipment: "Vlastní váha", muscle: "Vzpřimovače páteře" },
+                    { id: 30, name: "Veslování s gumou", difficulty: 2, sets: "3x15-20", equipment: "Posilovací guma", muscle: "Široký sval zádový" },
+                    { id: 31, name: "Reverzní plank", difficulty: 3, sets: "3x30-45s", equipment: "Vlastní váha", muscle: "Záda, core" },
+                    { id: 32, name: "Bird dog", difficulty: 1, sets: "3x10 každá strana", equipment: "Vlastní váha", muscle: "Core, vzpřimovače" }
+                ],
+                shoulders: [
+                    { id: 33, name: "Pike push-ups", difficulty: 3, sets: "3x10-12", equipment: "Vlastní váha", muscle: "Přední deltový" },
+                    { id: 34, name: "Upažování s lahvemi", difficulty: 1, sets: "3x15-20", equipment: "Lahve s vodou", muscle: "Střední deltový" },
+                    { id: 35, name: "Vzpory ve stoji na rukou", difficulty: 5, sets: "3x30-60s", equipment: "Zeď", muscle: "Ramena, core" },
+                    { id: 36, name: "Plank to downward dog", difficulty: 2, sets: "3x12-15", equipment: "Vlastní váha", muscle: "Ramena, core" }
+                ],
+                arms: [
+                    { id: 37, name: "Bicepsové zdvihy s lahvemi", difficulty: 1, sets: "3x15-20", equipment: "Lahve s vodou", muscle: "Biceps" },
+                    { id: 38, name: "Tricepsové dipy", difficulty: 3, sets: "3x10-15", equipment: "Židle", muscle: "Triceps" },
+                    { id: 39, name: "Úzké kliky", difficulty: 3, sets: "3x10-12", equipment: "Vlastní váha", muscle: "Triceps" },
+                    { id: 40, name: "Izometrický výdrž", difficulty: 2, sets: "3x30-45s", equipment: "Ručník", muscle: "Biceps" }
+                ],
+                abs: [
+                    { id: 41, name: "Sedy-lehy", difficulty: 2, sets: "3x20-30", equipment: "Vlastní váha", muscle: "Přímý břišní" },
+                    { id: 42, name: "Přednožování vleže", difficulty: 2, sets: "3x15-20", equipment: "Vlastní váha", muscle: "Dolní břišní" },
+                    { id: 43, name: "Plank", difficulty: 2, sets: "3x30-60s", equipment: "Vlastní váha", muscle: "Core" },
+                    { id: 44, name: "Mountain climbers", difficulty: 3, sets: "3x20-30", equipment: "Vlastní váha", muscle: "Core, kardio" }
+                ],
+                legs: [
+                    { id: 45, name: "Dřepy", difficulty: 2, sets: "3x20-25", equipment: "Vlastní váha", muscle: "Kvadriceps, hýždě" },
+                    { id: 46, name: "Výpady", difficulty: 3, sets: "3x12 každá noha", equipment: "Vlastní váha", muscle: "Kvadriceps, hýždě" },
+                    { id: 47, name: "Bulharské dřepy", difficulty: 4, sets: "3x10 každá noha", equipment: "Židle", muscle: "Kvadriceps, hýždě" },
+                    { id: 48, name: "Výpony na špičky", difficulty: 1, sets: "3x25-30", equipment: "Vlastní váha", muscle: "Lýtka" }
+                ]
+            }
+        };
+
+        let selectedEnvironment = null;
+        let selectedBodyPart = null;
+        let selectedExerciseId = null;
+        let currentUser = {
+            name: '',
+            email: '',
+            goal: 'strength',
+            plans: []
+        };
+
+        // Načtení dat z localStorage
+        function loadUserData() {
+            const saved = localStorage.getItem('fitnessUserData');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+                updateProfileUI();
+                updateSavedPlansUI();
+            }
+        }
+
+        // Uložení dat do localStorage
+        function saveUserData() {
+            localStorage.setItem('fitnessUserData', JSON.stringify(currentUser));
+        }
+
+        // Změna tématu podle sekce
+        function updateTheme(screenId) {
+            const body = document.body;
+            body.classList.remove('carbon-theme', 'midnight-theme', 'muscle-theme', 'clean-theme', 'grit-theme');
+            
+            switch(screenId) {
+                case 'home':
+                case 'products':
+                case 'music':
+                    body.classList.add('carbon-theme');
+                    break;
+                case 'exercises':
+                    body.classList.add('midnight-theme');
+                    break;
+                case 'plan':
+                    body.classList.add('muscle-theme');
+                    break;
+                case 'nutrition':
+                    body.classList.add('clean-theme');
+                    break;
+                case 'profile':
+                    body.classList.add('grit-theme');
+                    break;
+            }
+        }
+
+        // Přepínání obrazovek
+        function showScreen(screenId) {
+            const currentActive = document.querySelector('.screen.active');
+            const newScreen = document.getElementById(screenId);
+            
+            if (currentActive && currentActive !== newScreen) {
+                // Fade out current screen
+                currentActive.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    currentActive.classList.remove('active', 'fade-out');
+                    
+                    // Fade in new screen
+                    newScreen.classList.add('active');
+                    
+                    // Update nav tabs
+                    document.querySelectorAll('.nav-tab').forEach(tab => {
+                        tab.classList.remove('active');
+                    });
+                    
+                    // Find and activate the corresponding tab
+                    const activeTab = document.querySelector(`.nav-tab[onclick="showScreen('${screenId}')"]`);
+                    if (activeTab) {
+                        activeTab.classList.add('active');
+                    }
+                    
+                    if (screenId === 'exercises') {
+                        setTimeout(() => displayExercises(), 100);
+                    }
+                    
+                    if (screenId === 'profile') {
+                        setTimeout(() => initializeMuscleGrowthChart(), 100);
+                    }
+                    
+                    // Změna tématu podle sekce
+                    updateTheme(screenId);
+                }, 300);
+            } else if (!currentActive) {
+                // First load
+                newScreen.classList.add('active');
+                const activeTab = document.querySelector(`.nav-tab[onclick="showScreen('${screenId}')"]`);
+                if (activeTab) {
+                    activeTab.classList.add('active');
+                }
+                updateTheme(screenId);
+            }
+        }
+
+        // Výběr prostředí
+        function selectEnvironment(env) {
+            selectedEnvironment = env;
+            document.querySelectorAll('.env-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.env-card').classList.add('selected');
+            document.getElementById('bodyPartSelection').style.display = 'block';
+        }
+
+        // Výběr tělesné partie
+        function selectBodyPart(part) {
+            selectedBodyPart = part;
+            document.querySelectorAll('.body-part').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.body-part').classList.add('selected');
+        }
+
+        // Zobrazení cviků
+        function showExercises() {
+            if (!selectedEnvironment || !selectedBodyPart) {
+                alert('Prosím vyberte prostředí a tělesnou partii');
+                return;
+            }
+            showScreen('exercises');
+            displayExercises();
+        }
+
+        // Vykreslení cviků
+        function displayExercises() {
+            const container = document.getElementById('exerciseList');
+            container.innerHTML = '';
+
+            let exercisesToShow = [];
+            
+            // Filtrování podle vybraných kritérií
+            const filterBodyPart = document.getElementById('filterBodyPart').value;
+            const filterDifficulty = document.getElementById('filterDifficulty').value;
+            const searchTerm = document.getElementById('searchExercise').value.toLowerCase();
+
+            // Pokud je vybráno prostředí a partie z domovské obrazovky
+            if (selectedEnvironment && selectedBodyPart) {
+                exercisesToShow = exercises[selectedEnvironment][selectedBodyPart] || [];
+            } else {
+                // Zobrazit všechny cviky
+                Object.keys(exercises).forEach(env => {
+                    Object.keys(exercises[env]).forEach(part => {
+                        if (!filterBodyPart || filterBodyPart === part) {
+                            exercisesToShow = exercisesToShow.concat(exercises[env][part]);
+                        }
+                    });
+                });
+            }
+
+            // Aplikovat filtry
+            exercisesToShow = exercisesToShow.filter(exercise => {
+                if (filterDifficulty && exercise.difficulty !== parseInt(filterDifficulty)) {
+                    return false;
+                }
+                if (searchTerm && !exercise.name.toLowerCase().includes(searchTerm)) {
+                    return false;
+                }
+                return true;
+            });
+
+            exercisesToShow.forEach(exercise => {
+                const card = createExerciseCard(exercise);
+                container.appendChild(card);
+            });
+        }
+
+        // Vytvoření karty cviku
+        function createExerciseCard(exercise) {
+            const card = document.createElement('div');
+            card.className = 'exercise-card';
+            card.draggable = true;
+            card.dataset.exerciseId = exercise.id;
+            
+            card.innerHTML = `
+                <div class="exercise-image">💪</div>
+                <div class="exercise-info">
+                    <div class="exercise-name">${exercise.name}</div>
+                    <div class="difficulty">${'⭐'.repeat(exercise.difficulty)}</div>
+                    <div class="exercise-details">
+                        <p><strong>Série/Opakování:</strong> ${exercise.sets}</p>
+                        <p><strong>Vybavení:</strong> ${exercise.equipment}</p>
+                        <p><strong>Zapojené svaly:</strong> ${exercise.muscle}</p>
+                    </div>
+                    <a href="${exercise.videoUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(exercise.name + ' jak cvičit')}`}" target="_blank" class="btn-video-link">📹 Jak na to</a>
+                    <button class="btn-add-to-plan" onclick="showDaySelector(${exercise.id})">Přidat do plánu</button>
+                </div>
+            `;
+
+            // Drag and drop události
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+
+            return card;
+        }
+
+        // Drag and Drop
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'copy';
+            e.dataTransfer.setData('text/html', e.target.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        // Nastavení drop zones
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.addEventListener('dragover', handleDragOver);
+            zone.addEventListener('drop', handleDrop);
+            zone.addEventListener('dragleave', handleDragLeave);
+        });
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            if (draggedElement) {
+                const exerciseId = draggedElement.dataset.exerciseId;
+                const exercise = findExerciseById(exerciseId);
+                
+                if (exercise) {
+                    const exerciseElement = document.createElement('div');
+                    exerciseElement.style.marginBottom = '10px';
+                    exerciseElement.innerHTML = `
+                        <strong>${exercise.name}</strong> - ${exercise.sets}
+                        <button onclick="removeFromPlan(this)" style="margin-left: 10px; color: var(--neon-pink); border: none; background: none; cursor: pointer;">❌</button>
+                    `;
+                    
+                    // Odstranit placeholder text pokud existuje
+                    const placeholder = e.currentTarget.querySelector('p');
+                    if (placeholder) {
+                        placeholder.remove();
+                    }
+                    
+                    e.currentTarget.appendChild(exerciseElement);
+                }
+            }
+        }
+
+        function findExerciseById(id) {
+            for (let env in exercises) {
+                for (let part in exercises[env]) {
+                    const found = exercises[env][part].find(ex => ex.id == id);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function removeFromPlan(button) {
+            button.parentElement.remove();
+        }
+
+        // Uložení plánu
+        function savePlan() {
+            const planName = prompt('Název tréninkového plánu:');
+            if (!planName) return;
+
+            const plan = {
+                name: planName,
+                date: new Date().toLocaleDateString('cs-CZ'),
+                days: {}
+            };
+
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                const day = zone.dataset.day;
+                const exercises = [];
+                zone.querySelectorAll('div').forEach(div => {
+                    if (div.querySelector('strong')) {
+                        exercises.push(div.querySelector('strong').textContent);
+                    }
+                });
+                plan.days[day] = exercises;
+            });
+
+            currentUser.plans.push(plan);
+            saveUserData();
+            updateSavedPlansUI();
+            alert('Plán byl úspěšně uložen!');
+        }
+
+        // Uložení profilu
+        function saveProfile() {
+            currentUser.name = document.getElementById('userName').value;
+            currentUser.email = document.getElementById('userEmail').value;
+            currentUser.goal = document.getElementById('userGoal').value;
+            saveUserData();
+            alert('Profil byl úspěšně uložen!');
+        }
+
+        // Aktualizace UI profilu
+        function updateProfileUI() {
+            document.getElementById('userName').value = currentUser.name || '';
+            document.getElementById('userEmail').value = currentUser.email || '';
+            document.getElementById('userGoal').value = currentUser.goal || 'strength';
+        }
+
+        // Aktualizace uložených plánů
+        function updateSavedPlansUI() {
+            const container = document.getElementById('savedPlans');
+            if (currentUser.plans.length === 0) {
+                container.innerHTML = '<p style="color: var(--gray-text);">Zatím nemáte žádné uložené plány</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            currentUser.plans.forEach((plan, index) => {
+                const planCard = document.createElement('div');
+                planCard.className = 'plan-card';
+                planCard.innerHTML = `
+                    <div>
+                        <h4>${plan.name}</h4>
+                        <p style="color: #999; font-size: 0.9rem;">Vytvořeno: ${plan.date}</p>
+                    </div>
+                    <button onclick="deletePlan(${index})" style="background: var(--neon-pink); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Smazat</button>
+                `;
+                container.appendChild(planCard);
+            });
+        }
+
+        function deletePlan(index) {
+            if (confirm('Opravdu chcete smazat tento plán?')) {
+                currentUser.plans.splice(index, 1);
+                saveUserData();
+                updateSavedPlansUI();
+            }
+        }
+
+        // Funkce pro zobrazení modalu s výběrem dne
+        function showDaySelector(exerciseId) {
+            selectedExerciseId = exerciseId;
+            document.getElementById('daySelectorModal').style.display = 'flex';
+        }
+
+        // Funkce pro zavření modalu
+        function closeDaySelector() {
+            document.getElementById('daySelectorModal').style.display = 'none';
+            selectedExerciseId = null;
+        }
+
+        // Funkce pro přidání cviku do vybraného dne
+        function addExerciseToDay(day) {
+            if (!selectedExerciseId) return;
+            
+            const exercise = findExerciseById(selectedExerciseId);
+            if (!exercise) return;
+            
+            // Najít správnou drop zone
+            const dropZone = document.querySelector(`.drop-zone[data-day="${day}"]`);
+            if (!dropZone) return;
+            
+            // Odstranit placeholder text pokud existuje
+            const placeholder = dropZone.querySelector('p');
+            if (placeholder) {
+                placeholder.remove();
+            }
+            
+            // Přidat cvik do plánu
+            const exerciseElement = document.createElement('div');
+            exerciseElement.style.marginBottom = '10px';
+            exerciseElement.innerHTML = `
+                <strong>${exercise.name}</strong> - ${exercise.sets}
+                <button onclick="removeFromPlan(this)" style="margin-left: 10px; color: var(--neon-pink); border: none; background: none; cursor: pointer;">❌</button>
+            `;
+            
+            dropZone.appendChild(exerciseElement);
+            closeDaySelector();
+            
+            // Automaticky přepnout na obrazovku s plánem
+            document.getElementById('plan').classList.add('active');
+            document.getElementById('exercises').classList.remove('active');
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector('.nav-tab[onclick*="plan"]').classList.add('active');
+        }
+
+        // Event listenery pro filtry
+        document.getElementById('filterBodyPart').addEventListener('change', displayExercises);
+        document.getElementById('filterDifficulty').addEventListener('change', displayExercises);
+        document.getElementById('searchExercise').addEventListener('input', displayExercises);
+
+        // Zavření modalu při kliknutí mimo něj
+        document.getElementById('daySelectorModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDaySelector();
+            }
+        });
+
+        // Databáze potravin
+        const foods = [
+            // Bílkoviny - maso a ryby
+            { id: 1, name: "Kuřecí prsa", category: "protein", calories: 165, protein: 31, carbs: 0, fats: 3.6, per: 100 },
+            { id: 2, name: "Kuřecí stehno", category: "protein", calories: 221, protein: 25, carbs: 0, fats: 14, per: 100 },
+            { id: 3, name: "Krůtí prsa", category: "protein", calories: 135, protein: 30, carbs: 0, fats: 1, per: 100 },
+            { id: 4, name: "Hovězí svíčková", category: "protein", calories: 218, protein: 26, carbs: 0, fats: 12, per: 100 },
+            { id: 5, name: "Hovězí roštěná", category: "protein", calories: 252, protein: 27, carbs: 0, fats: 16, per: 100 },
+            { id: 6, name: "Mleté hovězí", category: "protein", calories: 332, protein: 14, carbs: 0, fats: 30, per: 100 },
+            { id: 7, name: "Vepřová panenka", category: "protein", calories: 143, protein: 27, carbs: 0, fats: 3.5, per: 100 },
+            { id: 8, name: "Jehněčí kýta", category: "protein", calories: 282, protein: 25, carbs: 0, fats: 20, per: 100 },
+            { id: 9, name: "Losos", category: "protein", calories: 208, protein: 20, carbs: 0, fats: 13, per: 100 },
+            { id: 10, name: "Tuňák", category: "protein", calories: 132, protein: 28, carbs: 0, fats: 1, per: 100 },
+            { id: 11, name: "Treska", category: "protein", calories: 82, protein: 18, carbs: 0, fats: 0.7, per: 100 },
+            { id: 12, name: "Pstruh", category: "protein", calories: 119, protein: 21, carbs: 0, fats: 3.5, per: 100 },
+            { id: 13, name: "Makrela", category: "protein", calories: 205, protein: 19, carbs: 0, fats: 14, per: 100 },
+            { id: 14, name: "Sardinky", category: "protein", calories: 208, protein: 25, carbs: 0, fats: 11, per: 100 },
+            { id: 15, name: "Šunka", category: "protein", calories: 145, protein: 21, carbs: 1.5, fats: 6, per: 100 },
+            { id: 16, name: "Krůtí šunka", category: "protein", calories: 104, protein: 24, carbs: 1, fats: 0.5, per: 100 },
+            { id: 17, name: "Anglická slanina", category: "protein", calories: 417, protein: 37, carbs: 1.4, fats: 29, per: 100 },
+            { id: 18, name: "Krevety", category: "protein", calories: 99, protein: 24, carbs: 0.2, fats: 0.3, per: 100 },
+            { id: 19, name: "Králík", category: "protein", calories: 173, protein: 33, carbs: 0, fats: 3.5, per: 100 },
+            { id: 20, name: "Kuřecí játra", category: "protein", calories: 119, protein: 17, carbs: 0.7, fats: 4.8, per: 100 },
+            
+            // Bílkoviny - vejce a mléčné výrobky
+            { id: 21, name: "Vejce", category: "dairy", calories: 155, protein: 13, carbs: 1.1, fats: 11, per: 100 },
+            { id: 22, name: "Bílek", category: "dairy", calories: 52, protein: 11, carbs: 0.7, fats: 0.2, per: 100 },
+            { id: 23, name: "Žloutek", category: "dairy", calories: 322, protein: 16, carbs: 3.6, fats: 27, per: 100 },
+            { id: 24, name: "Tvaroh nízkotučný", category: "dairy", calories: 72, protein: 12, carbs: 3.3, fats: 0.4, per: 100 },
+            { id: 25, name: "Tvaroh polotučný", category: "dairy", calories: 98, protein: 11, carbs: 3.4, fats: 4.3, per: 100 },
+            { id: 26, name: "Řecký jogurt", category: "dairy", calories: 97, protein: 9, carbs: 4, fats: 5, per: 100 },
+            { id: 27, name: "Bílý jogurt", category: "dairy", calories: 61, protein: 3.5, carbs: 4.7, fats: 3.3, per: 100 },
+            { id: 28, name: "Kefír", category: "dairy", calories: 64, protein: 3.4, carbs: 4.7, fats: 3.5, per: 100 },
+            { id: 29, name: "Mléko polotučné", category: "dairy", calories: 47, protein: 3.4, carbs: 4.8, fats: 1.5, per: 100 },
+            { id: 30, name: "Mléko plnotučné", category: "dairy", calories: 64, protein: 3.2, carbs: 4.8, fats: 3.7, per: 100 },
+            { id: 31, name: "Skyr", category: "dairy", calories: 63, protein: 11, carbs: 4, fats: 0.2, per: 100 },
+            { id: 32, name: "Cottage sýr", category: "dairy", calories: 103, protein: 11, carbs: 3.4, fats: 4.5, per: 100 },
+            { id: 33, name: "Mozzarella", category: "dairy", calories: 280, protein: 28, carbs: 3.1, fats: 17, per: 100 },
+            { id: 34, name: "Mozzarella light", category: "dairy", calories: 149, protein: 24, carbs: 4, fats: 4.5, per: 100 },
+            { id: 35, name: "Eidam 30%", category: "dairy", calories: 268, protein: 29, carbs: 2, fats: 16, per: 100 },
+            { id: 36, name: "Parmazán", category: "dairy", calories: 431, protein: 38, carbs: 4.1, fats: 29, per: 100 },
+            { id: 37, name: "Balkánský sýr", category: "dairy", calories: 264, protein: 14, carbs: 4.1, fats: 21, per: 100 },
+            { id: 38, name: "Ricotta", category: "dairy", calories: 174, protein: 11, carbs: 3, fats: 13, per: 100 },
+            { id: 39, name: "Proteinový jogurt", category: "dairy", calories: 68, protein: 10, carbs: 4.8, fats: 0.8, per: 100 },
+            { id: 40, name: "Proteinový pudink", category: "dairy", calories: 85, protein: 15, carbs: 4, fats: 0.5, per: 100 },
+            
+            // Sacharidy - obiloviny, pečivo, rýže, luštěniny
+            { id: 41, name: "Rýže bílá", category: "carbs", calories: 130, protein: 2.7, carbs: 28, fats: 0.3, per: 100 },
+            { id: 42, name: "Rýže basmati", category: "carbs", calories: 121, protein: 3.5, carbs: 25, fats: 0.4, per: 100 },
+            { id: 43, name: "Rýže natural", category: "carbs", calories: 123, protein: 2.7, carbs: 26, fats: 1, per: 100 },
+            { id: 44, name: "Těstoviny bílé", category: "carbs", calories: 131, protein: 5, carbs: 25, fats: 1.1, per: 100 },
+            { id: 45, name: "Těstoviny celozrnné", category: "carbs", calories: 124, protein: 5.3, carbs: 23, fats: 1.4, per: 100 },
+            { id: 46, name: "Ovesné vločky", category: "carbs", calories: 389, protein: 17, carbs: 66, fats: 7, per: 100 },
+            { id: 47, name: "Jáhly", category: "carbs", calories: 119, protein: 3.5, carbs: 24, fats: 1, per: 100 },
+            { id: 48, name: "Pohanka", category: "carbs", calories: 92, protein: 3.4, carbs: 20, fats: 0.6, per: 100 },
+            { id: 49, name: "Quinoa", category: "carbs", calories: 120, protein: 4.4, carbs: 21, fats: 1.9, per: 100 },
+            { id: 50, name: "Kuskus", category: "carbs", calories: 112, protein: 3.8, carbs: 24, fats: 0.2, per: 100 },
+            { id: 51, name: "Bulgur", category: "carbs", calories: 83, protein: 3.1, carbs: 19, fats: 0.2, per: 100 },
+            { id: 52, name: "Červená čočka", category: "carbs", calories: 116, protein: 9, carbs: 20, fats: 0.4, per: 100 },
+            { id: 53, name: "Hnědá čočka", category: "carbs", calories: 116, protein: 9, carbs: 20, fats: 0.4, per: 100 },
+            { id: 54, name: "Zelená čočka", category: "carbs", calories: 116, protein: 9, carbs: 20, fats: 0.4, per: 100 },
+            { id: 55, name: "Cizrna", category: "carbs", calories: 164, protein: 8.9, carbs: 27, fats: 2.6, per: 100 },
+            { id: 56, name: "Fazole červené", category: "carbs", calories: 127, protein: 8.7, carbs: 23, fats: 0.5, per: 100 },
+            { id: 57, name: "Fazole bílé", category: "carbs", calories: 140, protein: 9.7, carbs: 25, fats: 0.9, per: 100 },
+            { id: 58, name: "Hrách", category: "carbs", calories: 81, protein: 5.4, carbs: 14, fats: 0.4, per: 100 },
+            { id: 59, name: "Chléb žitný", category: "carbs", calories: 259, protein: 9, carbs: 48, fats: 3.3, per: 100 },
+            { id: 60, name: "Chléb celozrnný", category: "carbs", calories: 247, protein: 13, carbs: 41, fats: 3.4, per: 100 },
+            { id: 61, name: "Toustový chléb", category: "carbs", calories: 265, protein: 9, carbs: 49, fats: 3.2, per: 100 },
+            { id: 62, name: "Houska", category: "carbs", calories: 272, protein: 8.5, carbs: 54, fats: 2.6, per: 100 },
+            { id: 63, name: "Rohlík", category: "carbs", calories: 272, protein: 8.5, carbs: 54, fats: 2.6, per: 100 },
+            { id: 64, name: "Bageta", category: "carbs", calories: 248, protein: 7.5, carbs: 51, fats: 1.2, per: 100 },
+            { id: 65, name: "Tortilla", category: "carbs", calories: 326, protein: 8.5, carbs: 50, fats: 9.7, per: 100 },
+            { id: 66, name: "Pita", category: "carbs", calories: 275, protein: 9.1, carbs: 56, fats: 1.2, per: 100 },
+            { id: 67, name: "Knäckebrot", category: "carbs", calories: 366, protein: 10, carbs: 79, fats: 1.3, per: 100 },
+            { id: 68, name: "Rýžové chlebíčky", category: "carbs", calories: 387, protein: 8.8, carbs: 82, fats: 3.5, per: 100 },
+            { id: 69, name: "Müsli", category: "carbs", calories: 368, protein: 10, carbs: 64, fats: 8, per: 100 },
+            { id: 70, name: "Granola", category: "carbs", calories: 471, protein: 10, carbs: 64, fats: 20, per: 100 },
+            { id: 71, name: "Cornflakes", category: "carbs", calories: 357, protein: 7.5, carbs: 84, fats: 0.9, per: 100 },
+            { id: 72, name: "Batáty", category: "carbs", calories: 86, protein: 1.6, carbs: 20, fats: 0.1, per: 100 },
+            { id: 73, name: "Brambory", category: "carbs", calories: 77, protein: 2, carbs: 17, fats: 0.1, per: 100 },
+            { id: 74, name: "Amarant", category: "carbs", calories: 102, protein: 3.8, carbs: 19, fats: 1.6, per: 100 },
+            
+            // Ovoce
+            { id: 75, name: "Banán", category: "fruits", calories: 89, protein: 1.1, carbs: 23, fats: 0.3, per: 100 },
+            { id: 76, name: "Jablko", category: "fruits", calories: 52, protein: 0.3, carbs: 14, fats: 0.2, per: 100 },
+            { id: 77, name: "Hruška", category: "fruits", calories: 57, protein: 0.4, carbs: 15, fats: 0.1, per: 100 },
+            { id: 78, name: "Pomeranč", category: "fruits", calories: 47, protein: 0.9, carbs: 12, fats: 0.1, per: 100 },
+            { id: 79, name: "Mandarinka", category: "fruits", calories: 53, protein: 0.8, carbs: 13, fats: 0.3, per: 100 },
+            { id: 80, name: "Kiwi", category: "fruits", calories: 61, protein: 1.1, carbs: 15, fats: 0.5, per: 100 },
+            { id: 81, name: "Mango", category: "fruits", calories: 60, protein: 0.8, carbs: 15, fats: 0.4, per: 100 },
+            { id: 82, name: "Ananas", category: "fruits", calories: 50, protein: 0.5, carbs: 13, fats: 0.1, per: 100 },
+            { id: 83, name: "Hrozny", category: "fruits", calories: 69, protein: 0.7, carbs: 18, fats: 0.2, per: 100 },
+            { id: 84, name: "Broskev", category: "fruits", calories: 39, protein: 0.9, carbs: 10, fats: 0.3, per: 100 },
+            { id: 85, name: "Meruňka", category: "fruits", calories: 48, protein: 1.4, carbs: 11, fats: 0.4, per: 100 },
+            { id: 86, name: "Švestka", category: "fruits", calories: 46, protein: 0.7, carbs: 11, fats: 0.3, per: 100 },
+            { id: 87, name: "Meloun vodní", category: "fruits", calories: 30, protein: 0.6, carbs: 8, fats: 0.2, per: 100 },
+            { id: 88, name: "Meloun cukrový", category: "fruits", calories: 34, protein: 0.8, carbs: 8, fats: 0.2, per: 100 },
+            { id: 89, name: "Jahody", category: "fruits", calories: 32, protein: 0.7, carbs: 7.7, fats: 0.3, per: 100 },
+            { id: 90, name: "Maliny", category: "fruits", calories: 52, protein: 1.2, carbs: 12, fats: 0.7, per: 100 },
+            { id: 91, name: "Borůvky", category: "fruits", calories: 57, protein: 0.7, carbs: 14, fats: 0.3, per: 100 },
+            { id: 92, name: "Ostružiny", category: "fruits", calories: 43, protein: 1.4, carbs: 10, fats: 0.5, per: 100 },
+            { id: 93, name: "Rybíz", category: "fruits", calories: 56, protein: 1.4, carbs: 14, fats: 0.2, per: 100 },
+            { id: 94, name: "Třešně", category: "fruits", calories: 63, protein: 1.1, carbs: 16, fats: 0.2, per: 100 },
+            { id: 95, name: "Višně", category: "fruits", calories: 50, protein: 1, carbs: 12, fats: 0.3, per: 100 },
+            { id: 96, name: "Granátové jablko", category: "fruits", calories: 83, protein: 1.7, carbs: 19, fats: 1.2, per: 100 },
+            { id: 97, name: "Datle", category: "fruits", calories: 277, protein: 1.8, carbs: 75, fats: 0.2, per: 100 },
+            { id: 98, name: "Fíky", category: "fruits", calories: 74, protein: 0.8, carbs: 19, fats: 0.3, per: 100 },
+            { id: 99, name: "Grapefruit", category: "fruits", calories: 42, protein: 0.8, carbs: 11, fats: 0.1, per: 100 },
+            { id: 100, name: "Nektarinka", category: "fruits", calories: 44, protein: 1.1, carbs: 11, fats: 0.3, per: 100 },
+            { id: 101, name: "Papája", category: "fruits", calories: 43, protein: 0.5, carbs: 11, fats: 0.3, per: 100 },
+            { id: 102, name: "Avokádo", category: "fruits", calories: 160, protein: 2, carbs: 9, fats: 15, per: 100 },
+            { id: 103, name: "Kokos", category: "fruits", calories: 354, protein: 3.3, carbs: 15, fats: 33, per: 100 },
+            { id: 104, name: "Brusinky", category: "fruits", calories: 46, protein: 0.4, carbs: 12, fats: 0.1, per: 100 },
+            { id: 105, name: "Rozinky", category: "fruits", calories: 299, protein: 3.1, carbs: 79, fats: 0.5, per: 100 },
+            
+            // Zelenina
+            { id: 106, name: "Mrkev", category: "vegetables", calories: 41, protein: 0.9, carbs: 10, fats: 0.2, per: 100 },
+            { id: 107, name: "Petržel", category: "vegetables", calories: 36, protein: 3, carbs: 6, fats: 0.8, per: 100 },
+            { id: 108, name: "Celer", category: "vegetables", calories: 16, protein: 0.7, carbs: 3, fats: 0.2, per: 100 },
+            { id: 109, name: "Brokolice", category: "vegetables", calories: 34, protein: 2.8, carbs: 7, fats: 0.4, per: 100 },
+            { id: 110, name: "Květák", category: "vegetables", calories: 25, protein: 1.9, carbs: 5, fats: 0.3, per: 100 },
+            { id: 111, name: "Kedlubna", category: "vegetables", calories: 27, protein: 1.7, carbs: 6, fats: 0.1, per: 100 },
+            { id: 112, name: "Zelí bílé", category: "vegetables", calories: 25, protein: 1.3, carbs: 6, fats: 0.1, per: 100 },
+            { id: 113, name: "Zelí červené", category: "vegetables", calories: 31, protein: 1.4, carbs: 7, fats: 0.2, per: 100 },
+            { id: 114, name: "Kapusta", category: "vegetables", calories: 28, protein: 2, carbs: 6, fats: 0.1, per: 100 },
+            { id: 115, name: "Růžičková kapusta", category: "vegetables", calories: 43, protein: 3.4, carbs: 9, fats: 0.3, per: 100 },
+            { id: 116, name: "Špenát", category: "vegetables", calories: 23, protein: 2.9, carbs: 3.6, fats: 0.4, per: 100 },
+            { id: 117, name: "Mangold", category: "vegetables", calories: 19, protein: 1.8, carbs: 3.7, fats: 0.2, per: 100 },
+            { id: 118, name: "Rukola", category: "vegetables", calories: 25, protein: 2.6, carbs: 3.7, fats: 0.7, per: 100 },
+            { id: 119, name: "Ledový salát", category: "vegetables", calories: 14, protein: 0.9, carbs: 3, fats: 0.1, per: 100 },
+            { id: 120, name: "Rajče", category: "vegetables", calories: 18, protein: 0.9, carbs: 3.9, fats: 0.2, per: 100 },
+            { id: 121, name: "Cherry rajčata", category: "vegetables", calories: 18, protein: 0.9, carbs: 3.9, fats: 0.2, per: 100 },
+            { id: 122, name: "Paprika červená", category: "vegetables", calories: 31, protein: 1, carbs: 6, fats: 0.3, per: 100 },
+            { id: 123, name: "Paprika zelená", category: "vegetables", calories: 20, protein: 0.9, carbs: 4.6, fats: 0.2, per: 100 },
+            { id: 124, name: "Paprika žlutá", category: "vegetables", calories: 27, protein: 1, carbs: 6, fats: 0.2, per: 100 },
+            { id: 125, name: "Okurka salátová", category: "vegetables", calories: 16, protein: 0.7, carbs: 3.6, fats: 0.1, per: 100 },
+            { id: 126, name: "Cuketa", category: "vegetables", calories: 17, protein: 1.2, carbs: 3.1, fats: 0.3, per: 100 },
+            { id: 127, name: "Lilek", category: "vegetables", calories: 25, protein: 1, carbs: 6, fats: 0.2, per: 100 },
+            { id: 128, name: "Červená řepa", category: "vegetables", calories: 43, protein: 1.6, carbs: 10, fats: 0.2, per: 100 },
+            { id: 129, name: "Cibule", category: "vegetables", calories: 40, protein: 1.1, carbs: 9, fats: 0.1, per: 100 },
+            { id: 130, name: "Česnek", category: "vegetables", calories: 149, protein: 6.4, carbs: 33, fats: 0.5, per: 100 },
+            { id: 131, name: "Pór", category: "vegetables", calories: 61, protein: 1.5, carbs: 14, fats: 0.3, per: 100 },
+            { id: 132, name: "Jarní cibulka", category: "vegetables", calories: 32, protein: 1.8, carbs: 7, fats: 0.2, per: 100 },
+            { id: 133, name: "Ředkvičky", category: "vegetables", calories: 16, protein: 0.7, carbs: 3.4, fats: 0.1, per: 100 },
+            { id: 134, name: "Kukuřice", category: "vegetables", calories: 86, protein: 3.3, carbs: 19, fats: 1.4, per: 100 },
+            { id: 135, name: "Hrášek", category: "vegetables", calories: 81, protein: 5.4, carbs: 14, fats: 0.4, per: 100 },
+            { id: 136, name: "Fazolky", category: "vegetables", calories: 31, protein: 1.8, carbs: 7, fats: 0.2, per: 100 },
+            { id: 137, name: "Zelené fazolky", category: "vegetables", calories: 31, protein: 1.8, carbs: 7, fats: 0.2, per: 100 },
+            { id: 138, name: "Žampiony", category: "vegetables", calories: 22, protein: 3.1, carbs: 3.3, fats: 0.3, per: 100 },
+            { id: 139, name: "Hlíva ústřičná", category: "vegetables", calories: 33, protein: 3.3, carbs: 6.1, fats: 0.4, per: 100 },
+            
+            // Tuky a ořechy
+            { id: 140, name: "Olivový olej", category: "fats", calories: 884, protein: 0, carbs: 0, fats: 100, per: 100 },
+            { id: 141, name: "Máslo", category: "fats", calories: 717, protein: 0.9, carbs: 0.1, fats: 81, per: 100 },
+            { id: 142, name: "Kokosový olej", category: "fats", calories: 862, protein: 0, carbs: 0, fats: 100, per: 100 },
+            { id: 143, name: "Slunečnicový olej", category: "fats", calories: 884, protein: 0, carbs: 0, fats: 100, per: 100 },
+            { id: 144, name: "Mandle", category: "fats", calories: 579, protein: 21, carbs: 22, fats: 49, per: 100 },
+            { id: 145, name: "Vlašské ořechy", category: "fats", calories: 654, protein: 15, carbs: 14, fats: 65, per: 100 },
+            { id: 146, name: "Kešu", category: "fats", calories: 553, protein: 18, carbs: 30, fats: 44, per: 100 },
+            { id: 147, name: "Lískové ořechy", category: "fats", calories: 628, protein: 15, carbs: 17, fats: 61, per: 100 },
+            { id: 148, name: "Para ořechy", category: "fats", calories: 718, protein: 14, carbs: 12, fats: 76, per: 100 },
+            { id: 149, name: "Pistácie", category: "fats", calories: 560, protein: 20, carbs: 28, fats: 45, per: 100 },
+            { id: 150, name: "Arašídy", category: "fats", calories: 567, protein: 26, carbs: 16, fats: 49, per: 100 },
+            { id: 151, name: "Arašídové máslo", category: "fats", calories: 588, protein: 25, carbs: 20, fats: 50, per: 100 },
+            { id: 152, name: "Tahini", category: "fats", calories: 595, protein: 17, carbs: 21, fats: 54, per: 100 },
+            { id: 153, name: "Slunečnicová semínka", category: "fats", calories: 584, protein: 21, carbs: 20, fats: 51, per: 100 },
+            { id: 154, name: "Dýňová semínka", category: "fats", calories: 559, protein: 19, carbs: 11, fats: 49, per: 100 },
+            { id: 155, name: "Chia semínka", category: "fats", calories: 486, protein: 17, carbs: 42, fats: 31, per: 100 },
+            { id: 156, name: "Lněná semínka", category: "fats", calories: 534, protein: 18, carbs: 29, fats: 42, per: 100 },
+            { id: 157, name: "Sezamová semínka", category: "fats", calories: 573, protein: 18, carbs: 23, fats: 50, per: 100 }
+        ];
+
+        let dailyMeals = {
+            breakfast: [],
+            snack1: [],
+            lunch: [],
+            snack2: [],
+            dinner: []
+        };
+
+        let nutritionGoals = {
+            calories: 2000,
+            protein: 150,
+            carbs: 200,
+            fats: 67
+        };
+
+        let currentMealType = '';
+
+        // Výpočet nutričních cílů
+        function calculateNutritionGoals() {
+            const gender = document.getElementById('gender').value;
+            const age = parseInt(document.getElementById('age').value) || 25;
+            const height = parseInt(document.getElementById('height').value) || 175;
+            const weight = parseInt(document.getElementById('weight').value) || 70;
+            const activity = document.getElementById('activityLevel').value;
+            const goal = document.getElementById('nutritionGoal').value;
+
+            // Výpočet BMR (Mifflin-St Jeor)
+            let bmr;
+            if (gender === 'male') {
+                bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+                bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+            }
+
+            // Aktivitní faktor
+            const activityFactors = {
+                sedentary: 1.2,
+                light: 1.375,
+                moderate: 1.55,
+                active: 1.725
+            };
+
+            let tdee = bmr * activityFactors[activity];
+
+            // Úprava podle cíle
+            if (goal === 'loss') {
+                tdee *= 0.8; // 20% deficit
+            } else if (goal === 'gain') {
+                tdee *= 1.1; // 10% surplus
+            }
+
+            // Výpočet makroživin
+            const proteinGrams = weight * 2.2; // 2.2g na kg váhy
+            const fatsGrams = tdee * 0.3 / 9; // 30% kalorií z tuků
+            const carbsGrams = (tdee - (proteinGrams * 4) - (fatsGrams * 9)) / 4;
+
+            nutritionGoals = {
+                calories: Math.round(tdee),
+                protein: Math.round(proteinGrams),
+                carbs: Math.round(carbsGrams),
+                fats: Math.round(fatsGrams)
+            };
+
+            // Zobrazit výsledky
+            document.getElementById('targetCalories').textContent = nutritionGoals.calories;
+            document.getElementById('targetProtein').textContent = nutritionGoals.protein + 'g';
+            document.getElementById('targetCarbs').textContent = nutritionGoals.carbs + 'g';
+            document.getElementById('targetFats').textContent = nutritionGoals.fats + 'g';
+            document.getElementById('calculatedGoals').style.display = 'block';
+            
+            updateDailyProgress();
+        }
+
+        // Zobrazení potravin
+        function displayFoods() {
+            const container = document.getElementById('foodGrid');
+            const searchTerm = document.getElementById('searchFood').value.toLowerCase();
+            const category = document.getElementById('filterFoodCategory').value;
+            
+            container.innerHTML = '';
+            
+            const filteredFoods = foods.filter(food => {
+                const matchesSearch = food.name.toLowerCase().includes(searchTerm);
+                const matchesCategory = !category || food.category === category;
+                return matchesSearch && matchesCategory;
+            });
+
+            filteredFoods.forEach(food => {
+                const card = document.createElement('div');
+                card.className = 'food-card';
+                card.innerHTML = `
+                    <h5>${food.name}</h5>
+                    <p style="color: var(--gray-text); font-size: 12px;">Na 100g</p>
+                    <div style="margin-top: 10px;">
+                        <p>Kalorie: <strong>${food.calories}</strong></p>
+                        <p>B: ${food.protein}g | S: ${food.carbs}g | T: ${food.fats}g</p>
+                    </div>
+                `;
+                card.onclick = () => addFoodToMeal(food);
+                container.appendChild(card);
+            });
+        }
+
+        // Modal pro přidání jídla
+        function openFoodModal(mealType) {
+            currentMealType = mealType;
+            
+            // Vytvoření modalu
+            const existingModal = document.getElementById('foodModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            const modal = document.createElement('div');
+            modal.id = 'foodModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.8);
+                z-index: 2000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow-y: auto;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background-color: #1a1a1a;
+                border-radius: 20px;
+                padding: 30px;
+                max-width: 800px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                border: 2px solid var(--neon-green);
+            `;
+            
+            modalContent.innerHTML = `
+                <h3 style="color: var(--electric-blue); margin-bottom: 20px;">Přidat jídlo do ${getMealName(mealType)}</h3>
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="modalSearchFood" placeholder="Hledat potravinu..." 
+                           style="width: 100%; padding: 10px; border: 1px solid var(--border-gray); border-radius: 5px; background-color: #0a0a0a; color: var(--ice-white);">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <select id="modalFilterCategory" style="width: 100%; padding: 10px; border: 1px solid var(--border-gray); border-radius: 5px; background-color: #0a0a0a; color: var(--ice-white);">
+                        <option value="">Všechny kategorie</option>
+                        <option value="protein">Bílkoviny</option>
+                        <option value="carbs">Sacharidy</option>
+                        <option value="fats">Tuky</option>
+                        <option value="vegetables">Zelenina</option>
+                        <option value="fruits">Ovoce</option>
+                        <option value="dairy">Mléčné výrobky</option>
+                    </select>
+                </div>
+                <div id="modalFoodGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <!-- Potraviny se načtou zde -->
+                </div>
+                <button onclick="closeFoodModal()" style="background-color: var(--gray-text); color: var(--ice-white); border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer;">Zavřít</button>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Event listenery
+            document.getElementById('modalSearchFood').addEventListener('input', displayModalFoods);
+            document.getElementById('modalFilterCategory').addEventListener('change', displayModalFoods);
+            
+            // Zobrazit potraviny
+            displayModalFoods();
+            
+            // Zavřít modal při kliknutí mimo
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeFoodModal();
+                }
+            });
+        }
+        
+        function getMealName(mealType) {
+            const mealNames = {
+                breakfast: 'Snídaně',
+                snack1: 'Dopolední svačina',
+                lunch: 'Oběd',
+                snack2: 'Odpolední svačina',
+                dinner: 'Večeře'
+            };
+            return mealNames[mealType] || mealType;
+        }
+        
+        function closeFoodModal() {
+            const modal = document.getElementById('foodModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function displayModalFoods() {
+            const container = document.getElementById('modalFoodGrid');
+            const searchTerm = (document.getElementById('modalSearchFood').value || '').toLowerCase();
+            const category = document.getElementById('modalFilterCategory').value;
+            
+            container.innerHTML = '';
+            
+            const filteredFoods = foods.filter(food => {
+                const matchesSearch = food.name.toLowerCase().includes(searchTerm);
+                const matchesCategory = !category || food.category === category;
+                return matchesSearch && matchesCategory;
+            });
+            
+            filteredFoods.forEach(food => {
+                const card = document.createElement('div');
+                card.style.cssText = `
+                    background-color: #0a0a0a;
+                    border: 1px solid #333;
+                    border-radius: 10px;
+                    padding: 15px;
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                `;
+                card.innerHTML = `
+                    <h5 style="color: var(--electric-blue); margin-bottom: 10px;">${food.name}</h5>
+                    <p style="color: var(--gray-text); font-size: 12px;">Na 100g</p>
+                    <p style="font-size: 14px;">${food.calories} kcal</p>
+                    <p style="font-size: 12px; color: #999;">B: ${food.protein}g | S: ${food.carbs}g | T: ${food.fats}g</p>
+                `;
+                card.onmouseover = () => { card.style.borderColor = 'var(--electric-blue)'; card.style.transform = 'translateY(-3px)'; };
+                card.onmouseout = () => { card.style.borderColor = '#333'; card.style.transform = 'translateY(0)'; };
+                card.onclick = () => showAmountInput(food);
+                container.appendChild(card);
+            });
+        }
+        
+        function showAmountInput(food) {
+            const amountModal = document.createElement('div');
+            amountModal.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: #1a1a1a;
+                border: 2px solid var(--neon-green);
+                border-radius: 15px;
+                padding: 25px;
+                z-index: 3000;
+                min-width: 300px;
+            `;
+            
+            amountModal.innerHTML = `
+                <h4 style="color: var(--electric-blue); margin-bottom: 15px;">${food.name}</h4>
+                <p style="color: #999; margin-bottom: 15px;">Zadejte množství:</p>
+                <input type="number" id="foodAmount" value="100" min="1" max="1000" 
+                       style="width: 100%; padding: 10px; border: 1px solid var(--border-gray); border-radius: 5px; background-color: #0a0a0a; color: var(--ice-white); margin-bottom: 15px;">
+                <p style="color: var(--gray-text); font-size: 12px; margin-bottom: 15px;">gramů</p>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="confirmAddFood(${food.id})" 
+                            style="flex: 1; background-color: var(--electric-blue); color: var(--ice-white); border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+                        Přidat
+                    </button>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="flex: 1; background-color: var(--gray-text); color: var(--ice-white); border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+                        Zrušit
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(amountModal);
+            document.getElementById('foodAmount').focus();
+            
+            // Enter pro potvrzení
+            document.getElementById('foodAmount').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    confirmAddFood(food.id);
+                }
+            });
+        }
+        
+        function confirmAddFood(foodId) {
+            const amount = parseInt(document.getElementById('foodAmount').value);
+            if (amount && amount > 0) {
+                const food = foods.find(f => f.id === foodId);
+                if (food) {
+                    addFoodToMeal(food, amount);
+                    // Odstranit amount modal
+                    const amountModals = document.querySelectorAll('div[style*="z-index: 3000"]');
+                    amountModals.forEach(m => m.remove());
+                    // Zavřít hlavní modal
+                    closeFoodModal();
+                }
+            }
+        }
+
+        // Přidání jídla do denního plánu
+        function addFoodToMeal(food, amount = 100) {
+            const factor = amount / 100;
+            const mealItem = {
+                ...food,
+                amount: amount,
+                totalCalories: Math.round(food.calories * factor),
+                totalProtein: Math.round(food.protein * factor),
+                totalCarbs: Math.round(food.carbs * factor),
+                totalFats: Math.round(food.fats * factor)
+            };
+
+            dailyMeals[currentMealType].push(mealItem);
+            updateMealDisplay();
+            updateDailyProgress();
+        }
+
+        // Aktualizace zobrazení jídel
+        function updateMealDisplay() {
+            Object.keys(dailyMeals).forEach(mealType => {
+                const container = document.getElementById(`${mealType}-items`);
+                container.innerHTML = '';
+                
+                if (dailyMeals[mealType].length === 0) {
+                    container.innerHTML = '<p style="color: #666;">Zatím prázdné</p>';
+                } else {
+                    dailyMeals[mealType].forEach((item, index) => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.style.marginBottom = '10px';
+                        itemDiv.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>${item.name}</strong> (${item.amount}g)
+                                    <br>
+                                    <span style="font-size: 12px; color: #666;">
+                                        ${item.totalCalories} kcal | B: ${item.totalProtein}g | S: ${item.totalCarbs}g | T: ${item.totalFats}g
+                                    </span>
+                                </div>
+                                <button onclick="removeFood('${mealType}', ${index})" style="background: none; border: none; color: var(--neon-pink); cursor: pointer;">❌</button>
+                            </div>
+                        `;
+                        container.appendChild(itemDiv);
+                    });
+                }
+            });
+        }
+
+        // Odstranění jídla
+        function removeFood(mealType, index) {
+            dailyMeals[mealType].splice(index, 1);
+            updateMealDisplay();
+            updateDailyProgress();
+        }
+
+        // Aktualizace denního pokroku
+        function updateDailyProgress() {
+            let totalCalories = 0;
+            let totalProtein = 0;
+            let totalCarbs = 0;
+            let totalFats = 0;
+
+            Object.values(dailyMeals).forEach(meals => {
+                meals.forEach(meal => {
+                    totalCalories += meal.totalCalories;
+                    totalProtein += meal.totalProtein;
+                    totalCarbs += meal.totalCarbs;
+                    totalFats += meal.totalFats;
+                });
+            });
+
+            // Aktualizace progress baru
+            const progress = (totalCalories / nutritionGoals.calories) * 100;
+            document.querySelector('.progress-fill').style.width = Math.min(progress, 100) + '%';
+            
+            // Aktualizace textů
+            document.querySelector('.calories-progress span').textContent = `${totalCalories} kcal`;
+            document.getElementById('dailyCalorieGoal').textContent = `${nutritionGoals.calories} kcal`;
+            
+            document.getElementById('currentProtein').textContent = `${totalProtein}g / ${nutritionGoals.protein}g`;
+            document.getElementById('currentCarbs').textContent = `${totalCarbs}g / ${nutritionGoals.carbs}g`;
+            document.getElementById('currentFats').textContent = `${totalFats}g / ${nutritionGoals.fats}g`;
+        }
+
+        // Event listenery
+        document.getElementById('searchFood').addEventListener('input', displayFoods);
+        document.getElementById('filterFoodCategory').addEventListener('change', displayFoods);
+
+        // Databáze produktů
+        const products = [
+            {
+                id: 1,
+                name: "GymBeam 100% Kreatin monohydrát",
+                effects: "Zvyšuje fyzickou výkonnost při intenzivním tréninku. Podporuje růst svalové hmoty a síly.",
+                price: 399,
+                rating: 4.5,
+                category: "muscle-growth",
+                icon: "💪",
+                url: "https://www.google.com/search?q=Kreatin+monohyd%C3%A1t+100%25+GymBeam",
+                badge: "Bestseller"
+            },
+            {
+                id: 2,
+                name: "GymBeam Crea7in",
+                effects: "Kombinace 7 typů kreatinu pro maximální účinnost. Rychlejší vstřebávání a lepší výsledky.",
+                price: 349,
+                rating: 4.7,
+                category: "muscle-growth",
+                icon: "⚡",
+                url: "https://www.google.com/search?q=Crea7in+kreatin+GymBeam"
+            },
+            {
+                id: 3,
+                name: "GymBeam Triple Magnesium",
+                effects: "Podporuje funkci svalů a nervového systému. Snižuje křeče a zlepšuje regeneraci.",
+                price: 249,
+                rating: 4.8,
+                category: "vitamins",
+                icon: "🧲",
+                url: "https://www.google.com/search?q=Triple+Magnesium+GymBeam",
+                badge: "Top rated"
+            },
+            {
+                id: 4,
+                name: "GymBeam Magnesium chelate + B6",
+                effects: "Snižuje únavu a vyčerpání, podporuje nervový systém. Ideální pro sportovce.",
+                price: 56,
+                rating: 4.8,
+                category: "vitamins",
+                icon: "💊",
+                url: "https://www.google.com/search?q=Magnesium+Chelate+B6+GymBeam",
+                badge: "Nejlepší cena"
+            },
+            {
+                id: 5,
+                name: "GymBeam Acetyl L-karnitin",
+                effects: "Podporuje metabolismus tuků a energii. Pomáhá při hubnutí a zvyšuje vytrvalost.",
+                price: 259,
+                rating: 4.4,
+                category: "energy",
+                icon: "🔥",
+                url: "https://www.google.com/search?q=Acetyl+L-Carnitine+GymBeam"
+            },
+            {
+                id: 6,
+                name: "GymBeam EAA",
+                effects: "Obsahuje esenciální aminokyseliny pro regeneraci svalů. Zabraňuje katabolismu.",
+                price: 419,
+                rating: 4.0,
+                category: "amino",
+                icon: "🧬",
+                url: "https://www.google.com/search?q=EAA+esen%C4%8Dn%C3%AD+aminokyseliny+GymBeam"
+            },
+            {
+                id: 7,
+                name: "GymBeam Just Whey",
+                effects: "Vícesložkový syrovátkový protein pro podporu svalové hmoty. 23g proteinu v porci.",
+                price: 729,
+                rating: 4.7,
+                category: "protein",
+                icon: "🥛",
+                url: "https://www.google.com/search?q=Just+Whey+protein+GymBeam",
+                badge: "Premium"
+            },
+            {
+                id: 8,
+                name: "GymBeam Anabolic Whey",
+                effects: "Podporuje růst svalové hmoty a regeneraci. Obohaceno o kreatin a glutamin.",
+                price: 419,
+                rating: 4.6,
+                category: "protein",
+                icon: "💯",
+                url: "https://www.google.com/search?q=Anabolic+Whey+protein+GymBeam"
+            },
+            {
+                id: 9,
+                name: "GymBeam BCAA 4:1:1",
+                effects: "Větvené aminokyseliny v optimálním poměru. Chrání svaly před rozpadem.",
+                price: 369,
+                rating: 4.5,
+                category: "amino",
+                icon: "⚗️",
+                url: "https://www.google.com/search?q=BCAA+4%3A1%3A1+GymBeam"
+            },
+            {
+                id: 10,
+                name: "GymBeam Pre-Workout Beast Mode",
+                effects: "Maximální energie a fokus před tréninkem. Obsahuje kofein, beta-alanin a citrulin.",
+                price: 599,
+                rating: 4.8,
+                category: "energy",
+                icon: "🚀",
+                url: "https://www.google.com/search?q=Pre-Workout+Beast+Mode+GymBeam",
+                badge: "Extreme"
+            },
+            {
+                id: 11,
+                name: "GymBeam Multivitamin Daily",
+                effects: "Kompletní spektrum vitamínů a minerálů. Podporuje imunitu a celkové zdraví.",
+                price: 199,
+                rating: 4.3,
+                category: "vitamins",
+                icon: "🌈",
+                url: "https://www.google.com/search?q=Multivitamin+Daily+GymBeam"
+            },
+            {
+                id: 12,
+                name: "GymBeam Omega 3",
+                effects: "Esenciální mastné kyseliny pro zdraví srdce a mozku. Snižuje zánět v těle.",
+                price: 289,
+                rating: 4.6,
+                category: "vitamins",
+                icon: "🐟",
+                url: "https://www.google.com/search?q=Omega+3+GymBeam"
+            },
+            {
+                id: 13,
+                name: "GymBeam Collagen",
+                effects: "Podporuje zdraví kloubů, šlach a kůže. Důležitý pro sportovce.",
+                price: 399,
+                rating: 4.4,
+                category: "regeneration",
+                icon: "🦴",
+                url: "https://www.google.com/search?q=Kolagen+Collagen+GymBeam"
+            },
+            {
+                id: 14,
+                name: "GymBeam ZMA",
+                effects: "Zinek, hořčík a B6 pro lepší spánek a regeneraci. Zvyšuje hladinu testosteronu.",
+                price: 249,
+                rating: 4.5,
+                category: "regeneration",
+                icon: "😴",
+                url: "https://www.google.com/search?q=ZMA+zinek+ho%C5%99%C4%8D%C3%ADk+B6+GymBeam"
+            },
+            {
+                id: 15,
+                name: "GymBeam Glutamine",
+                effects: "Nejdůležitější aminokyselina pro regeneraci. Posiluje imunitní systém.",
+                price: 329,
+                rating: 4.3,
+                category: "regeneration",
+                icon: "🛡️",
+                url: "https://www.google.com/search?q=Glutamine+glutamin+GymBeam"
+            }
+        ];
+        
+        // Funkce pro zobrazení produktů
+        function displayProducts() {
+            const container = document.getElementById('productGrid');
+            if (!container) return;
+            
+            const searchTerm = (document.getElementById('searchProduct')?.value || '').toLowerCase();
+            const categoryFilter = document.getElementById('filterProductCategory')?.value || '';
+            const priceFilter = document.getElementById('filterProductPrice')?.value || '';
+            
+            container.innerHTML = '';
+            
+            let filteredProducts = products.filter(product => {
+                // Filtrování podle vyhledávání
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
+                                    product.effects.toLowerCase().includes(searchTerm);
+                
+                // Filtrování podle kategorie
+                const matchesCategory = !categoryFilter || product.category === categoryFilter;
+                
+                // Filtrování podle ceny
+                let matchesPrice = true;
+                if (priceFilter) {
+                    if (priceFilter === '0-200') matchesPrice = product.price <= 200;
+                    else if (priceFilter === '200-500') matchesPrice = product.price > 200 && product.price <= 500;
+                    else if (priceFilter === '500+') matchesPrice = product.price > 500;
+                }
+                
+                return matchesSearch && matchesCategory && matchesPrice;
+            });
+            
+            filteredProducts.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                
+                const stars = '⭐'.repeat(Math.floor(product.rating));
+                const halfStar = (product.rating % 1 >= 0.5) ? '✨' : '';
+                
+                card.innerHTML = `
+                    ${product.badge ? `<div class="product-badge">${product.badge}</div>` : ''}
+                    <div class="product-image">
+                        <span style="font-size: 80px;">${product.icon}</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-effects">${product.effects}</p>
+                        <div class="product-rating">
+                            <span class="stars">${stars}${halfStar}</span>
+                            <span class="rating-number">${product.rating}/5</span>
+                        </div>
+                        <div class="product-price">${product.price} Kč</div>
+                        <a href="${product.url}" target="_blank" class="btn-buy">
+                            Koupit na GymBeam
+                        </a>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            if (filteredProducts.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; grid-column: 1/-1;">Žádné produkty nebyly nalezeny.</p>';
+            }
+        }
+        
+        // Funkce pro vytvoření interaktivního grafu svalového růstu
+        function initializeMuscleGrowthChart() {
+            const chartContainer = document.querySelector('#muscleGrowthChart');
+            if (!chartContainer) return;
+            
+            // Data pro graf - týdenní projekce svalového růstu
+            const muscleGrowthData = [
+                { week: 1, growth: 0.2, tooltip: "0.2 kg svalů tento týden" },
+                { week: 2, growth: 0.5, tooltip: "0.3 kg svalů tento týden" },
+                { week: 3, growth: 0.9, tooltip: "0.4 kg svalů tento týden" },
+                { week: 4, growth: 1.3, tooltip: "0.4 kg svalů tento týden" }
+            ];
+            
+            // Vytvoření tooltip elementu pouze jednou
+            let tooltip = document.getElementById('muscleGrowthTooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.id = 'muscleGrowthTooltip';
+                tooltip.style.cssText = `
+                    position: absolute;
+                    background: rgba(0, 0, 0, 0.9);
+                    color: var(--ice-white);
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    pointer-events: none;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    z-index: 1000;
+                    border: 1px solid var(--neon-pink);
+                    box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+                `;
+                document.body.appendChild(tooltip);
+            }
+            
+            // Přidání event listenerů na body grafu
+            const chartPoints = chartContainer.querySelectorAll('.chart-point');
+            chartPoints.forEach((point, index) => {
+                if (muscleGrowthData[index]) {
+                    point.addEventListener('mouseenter', (e) => {
+                        const rect = e.target.getBoundingClientRect();
+                        tooltip.textContent = muscleGrowthData[index].tooltip;
+                        tooltip.style.left = rect.left + 'px';
+                        tooltip.style.top = (rect.top - 40) + 'px';
+                        tooltip.style.opacity = '1';
+                    });
+                    
+                    point.addEventListener('mouseleave', () => {
+                        tooltip.style.opacity = '0';
+                    });
+                    
+                    // Mobilní podpora
+                    point.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        const rect = e.target.getBoundingClientRect();
+                        tooltip.textContent = muscleGrowthData[index].tooltip;
+                        tooltip.style.left = rect.left + 'px';
+                        tooltip.style.top = (rect.top - 40) + 'px';
+                        tooltip.style.opacity = '1';
+                        
+                        setTimeout(() => {
+                            tooltip.style.opacity = '0';
+                        }, 2000);
+                    });
+                }
+            });
+            
+            // Aktualizace hodnot grafu na základě uživatelských dat
+            function updateMuscleGrowthProjection() {
+                const workoutFrequency = parseInt(document.getElementById('workoutFrequency').value);
+                const proteinIntake = document.getElementById('proteinIntake').value;
+                const userGoal = currentUser.goal || 'strength';
+                
+                // Aktualizace zobrazení frekvence
+                document.getElementById('frequencyDisplay').textContent = `${workoutFrequency}x týdně`;
+                
+                // Výpočet růstu na základě frekvence tréninku
+                let baseGrowthRate = 0;
+                if (workoutFrequency === 0) baseGrowthRate = 0;
+                else if (workoutFrequency === 1) baseGrowthRate = 0.15;
+                else if (workoutFrequency === 2) baseGrowthRate = 0.25;
+                else if (workoutFrequency === 3) baseGrowthRate = 0.35;
+                else if (workoutFrequency === 4) baseGrowthRate = 0.4;
+                else if (workoutFrequency === 5) baseGrowthRate = 0.42;
+                else if (workoutFrequency === 6) baseGrowthRate = 0.4; // Přetrénování
+                else if (workoutFrequency === 7) baseGrowthRate = 0.35; // Výrazné přetrénování
+                
+                // Faktory pro příjem bílkovin
+                let proteinMultiplier = 1;
+                if (proteinIntake === 'low') proteinMultiplier = 0.6;
+                else if (proteinIntake === 'moderate') proteinMultiplier = 1;
+                else if (proteinIntake === 'high') proteinMultiplier = 1.2;
+                
+                // Faktory pro cíl tréninku
+                let goalMultiplier = 1;
+                if (userGoal === 'muscle') goalMultiplier = 1.2;
+                else if (userGoal === 'strength') goalMultiplier = 1;
+                else if (userGoal === 'endurance') goalMultiplier = 0.6;
+                else if (userGoal === 'weight-loss') goalMultiplier = 0.4;
+                
+                // Celkový multiplikátor
+                const totalMultiplier = proteinMultiplier * goalMultiplier;
+                
+                // Aktualizace dat s progresivním růstem
+                let cumulativeGrowth = 0;
+                muscleGrowthData.forEach((data, index) => {
+                    const weeklyGrowth = baseGrowthRate * totalMultiplier * (1 - index * 0.05); // Mírně klesající růst
+                    cumulativeGrowth += weeklyGrowth;
+                    data.growth = cumulativeGrowth;
+                    data.tooltip = `+${weeklyGrowth.toFixed(2)} kg svalů tento týden (celkem: ${cumulativeGrowth.toFixed(2)} kg)`;
+                });
+                
+                // Aktualizace vizualizace grafu
+                const maxGrowth = Math.max(...muscleGrowthData.map(d => d.growth));
+                const scale = maxGrowth > 0 ? 150 / maxGrowth : 0;
+                
+                const chartLine = chartContainer.querySelector('.chart-line');
+                const chartArea = chartContainer.querySelector('.chart-area');
+                const chartPointElements = chartContainer.querySelectorAll('.chart-point');
+                
+                if (chartLine && chartArea) {
+                    const pathData = muscleGrowthData.map((data, index) => {
+                        const x = index * 100;
+                        const y = 200 - (data.growth * scale);
+                        return `${index === 0 ? 'M' : 'L'} ${x},${y}`;
+                    }).join(' ');
+                    
+                    chartLine.setAttribute('d', pathData);
+                    chartArea.setAttribute('d', `M 0,200 L ${pathData.substring(2)} L 300,200 Z`);
+                    
+                    // Aktualizace pozic bodů
+                    chartPointElements.forEach((point, index) => {
+                        if (muscleGrowthData[index]) {
+                            const y = 200 - (muscleGrowthData[index].growth * scale);
+                            point.setAttribute('cy', y);
+                        }
+                    });
+                }
+                
+                // Aktualizace stupnice na ose Y
+                const gridValues = chartContainer.querySelectorAll('.grid-value');
+                const gridSteps = [0, 0.25, 0.5, 0.75, 1];
+                gridValues.forEach((value, index) => {
+                    const scaleValue = maxGrowth * (1 - gridSteps[index]);
+                    value.textContent = `+${scaleValue.toFixed(1)} kg`;
+                });
+                
+                // Aktualizace souhrnu
+                const summary = document.getElementById('growthSummary');
+                const totalGrowth = muscleGrowthData[3].growth;
+                let summaryText = '';
+                
+                if (workoutFrequency === 0) {
+                    summaryText = 'Bez tréninku nedojde k růstu svalové hmoty';
+                } else if (workoutFrequency > 5) {
+                    summaryText = `Při ${workoutFrequency}x týdně tréninku hrozí přetrénování! Doporučujeme 3-5x týdně. Potenciální růst: ${totalGrowth.toFixed(1)} kg/měsíc`;
+                } else {
+                    const proteinText = proteinIntake === 'low' ? 'nízkém' : proteinIntake === 'moderate' ? 'středním' : 'vysokém';
+                    summaryText = `Při ${workoutFrequency}x týdně tréninku a ${proteinText} příjmu bílkovin můžete nabrat až ${totalGrowth.toFixed(1)} kg svalové hmoty za měsíc`;
+                }
+                
+                summary.textContent = summaryText;
+            }
+            
+            // Event listenery pro ovládací prvky
+            const frequencySlider = document.getElementById('workoutFrequency');
+            const proteinSelect = document.getElementById('proteinIntake');
+            
+            if (frequencySlider) {
+                frequencySlider.addEventListener('input', updateMuscleGrowthProjection);
+            }
+            
+            if (proteinSelect) {
+                proteinSelect.addEventListener('change', updateMuscleGrowthProjection);
+            }
+            
+            // Zavolat při načtení
+            updateMuscleGrowthProjection();
+            
+            // Posluchač pro změny v uživatelském profilu
+            document.addEventListener('userDataUpdated', updateMuscleGrowthProjection);
+        }
+        
+        // Funkce pro inicializaci grafu v sekci Grafy
+        function initializeGraphsMuscleGrowthChart() {
+            const chartContainer = document.querySelector('#graphsMuscleGrowthChart');
+            if (!chartContainer) return;
+            
+            // Data pro graf
+            const muscleGrowthData = [
+                { week: 1, growth: 0.2, tooltip: "0.2 kg svalů tento týden" },
+                { week: 2, growth: 0.5, tooltip: "0.3 kg svalů tento týden" },
+                { week: 3, growth: 0.9, tooltip: "0.4 kg svalů tento týden" },
+                { week: 4, growth: 1.3, tooltip: "0.4 kg svalů tento týden" }
+            ];
+            
+            // Vytvoření tooltip elementu
+            let tooltip = document.getElementById('graphsMuscleGrowthTooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.id = 'graphsMuscleGrowthTooltip';
+                tooltip.style.cssText = `
+                    position: absolute;
+                    background: rgba(0, 0, 0, 0.9);
+                    color: var(--ice-white);
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    pointer-events: none;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    z-index: 1000;
+                    border: 1px solid var(--neon-pink);
+                    box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+                `;
+                document.body.appendChild(tooltip);
+            }
+            
+            // Event listenery na body grafu
+            const chartPoints = chartContainer.querySelectorAll('.chart-point');
+            chartPoints.forEach((point, index) => {
+                if (muscleGrowthData[index]) {
+                    point.addEventListener('mouseenter', (e) => {
+                        const rect = e.target.getBoundingClientRect();
+                        tooltip.textContent = muscleGrowthData[index].tooltip;
+                        tooltip.style.left = rect.left + 'px';
+                        tooltip.style.top = (rect.top - 40) + 'px';
+                        tooltip.style.opacity = '1';
+                    });
+                    
+                    point.addEventListener('mouseleave', () => {
+                        tooltip.style.opacity = '0';
+                    });
+                    
+                    point.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        const rect = e.target.getBoundingClientRect();
+                        tooltip.textContent = muscleGrowthData[index].tooltip;
+                        tooltip.style.left = rect.left + 'px';
+                        tooltip.style.top = (rect.top - 40) + 'px';
+                        tooltip.style.opacity = '1';
+                        
+                        setTimeout(() => {
+                            tooltip.style.opacity = '0';
+                        }, 2000);
+                    });
+                }
+            });
+            
+            // Funkce pro aktualizaci grafu
+            function updateGraphsMuscleGrowthProjection() {
+                const workoutFrequency = parseInt(document.getElementById('graphsWorkoutFrequency').value);
+                const proteinIntake = document.getElementById('graphsProteinIntake').value;
+                
+                // Aktualizace zobrazení frekvence
+                document.getElementById('graphsFrequencyDisplay').textContent = `${workoutFrequency}x týdně`;
+                
+                // Výpočet růstu
+                let baseGrowthRate = 0;
+                if (workoutFrequency === 0) baseGrowthRate = 0;
+                else if (workoutFrequency === 1) baseGrowthRate = 0.15;
+                else if (workoutFrequency === 2) baseGrowthRate = 0.25;
+                else if (workoutFrequency === 3) baseGrowthRate = 0.35;
+                else if (workoutFrequency === 4) baseGrowthRate = 0.4;
+                else if (workoutFrequency === 5) baseGrowthRate = 0.42;
+                else if (workoutFrequency === 6) baseGrowthRate = 0.4;
+                else if (workoutFrequency === 7) baseGrowthRate = 0.35;
+                
+                // Faktory pro bílkoviny
+                let proteinMultiplier = 1;
+                if (proteinIntake === 'low') proteinMultiplier = 0.6;
+                else if (proteinIntake === 'moderate') proteinMultiplier = 1;
+                else if (proteinIntake === 'high') proteinMultiplier = 1.2;
+                
+                // Aktualizace dat
+                let cumulativeGrowth = 0;
+                muscleGrowthData.forEach((data, index) => {
+                    const weeklyGrowth = baseGrowthRate * proteinMultiplier * (1 - index * 0.05);
+                    cumulativeGrowth += weeklyGrowth;
+                    data.growth = cumulativeGrowth;
+                    data.tooltip = `+${weeklyGrowth.toFixed(2)} kg svalů tento týden (celkem: ${cumulativeGrowth.toFixed(2)} kg)`;
+                });
+                
+                // Aktualizace vizualizace
+                const maxGrowth = Math.max(...muscleGrowthData.map(d => d.growth));
+                const scale = maxGrowth > 0 ? 150 / maxGrowth : 0;
+                
+                const chartLine = chartContainer.querySelector('.chart-line');
+                const chartArea = chartContainer.querySelector('.chart-area');
+                const chartPointElements = chartContainer.querySelectorAll('.chart-point');
+                
+                if (chartLine && chartArea) {
+                    const pathData = muscleGrowthData.map((data, index) => {
+                        const x = index * 100;
+                        const y = 200 - (data.growth * scale);
+                        return `${index === 0 ? 'M' : 'L'} ${x},${y}`;
+                    }).join(' ');
+                    
+                    chartLine.setAttribute('d', pathData);
+                    chartArea.setAttribute('d', `M 0,200 L ${pathData.substring(2)} L 300,200 Z`);
+                    
+                    chartPointElements.forEach((point, index) => {
+                        if (muscleGrowthData[index]) {
+                            const y = 200 - (muscleGrowthData[index].growth * scale);
+                            point.setAttribute('cy', y);
+                        }
+                    });
+                }
+                
+                // Aktualizace stupnice
+                const gridValues = chartContainer.querySelectorAll('.grid-value');
+                const gridSteps = [0, 0.25, 0.5, 0.75, 1];
+                gridValues.forEach((value, index) => {
+                    const scaleValue = maxGrowth * (1 - gridSteps[index]);
+                    value.textContent = `+${scaleValue.toFixed(1)} kg`;
+                });
+                
+                // Aktualizace souhrnu
+                const summary = document.getElementById('graphsGrowthSummary');
+                const totalGrowth = muscleGrowthData[3].growth;
+                let summaryText = '';
+                
+                if (workoutFrequency === 0) {
+                    summaryText = 'Bez tréninku nedojde k růstu svalové hmoty';
+                } else if (workoutFrequency > 5) {
+                    summaryText = `Při ${workoutFrequency}x týdně tréninku hrozí přetrénování! Doporučujeme 3-5x týdně. Potenciální růst: ${totalGrowth.toFixed(1)} kg/měsíc`;
+                } else {
+                    const proteinText = proteinIntake === 'low' ? 'nízkém' : proteinIntake === 'moderate' ? 'středním' : 'vysokém';
+                    summaryText = `Při ${workoutFrequency}x týdně tréninku a ${proteinText} příjmu bílkovin můžete nabrat až ${totalGrowth.toFixed(1)} kg svalové hmoty za měsíc`;
+                }
+                
+                summary.textContent = summaryText;
+            }
+            
+            // Event listenery
+            const frequencySlider = document.getElementById('graphsWorkoutFrequency');
+            const proteinSelect = document.getElementById('graphsProteinIntake');
+            
+            if (frequencySlider) {
+                frequencySlider.addEventListener('input', updateGraphsMuscleGrowthProjection);
+            }
+            
+            if (proteinSelect) {
+                proteinSelect.addEventListener('change', updateGraphsMuscleGrowthProjection);
+            }
+            
+            // Inicializace
+            updateGraphsMuscleGrowthProjection();
+        }
+        
+        // Načtení dat při startu
+        loadUserData();
+        displayFoods();
+        displayProducts();
+        updateTheme('home'); // Nastavit výchozí téma
+        
+        // Inicializace grafu svalového růstu
+        setTimeout(initializeMuscleGrowthChart, 100);
+    </script>
+</body>
+</html>

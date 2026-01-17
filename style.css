@@ -6,3 +6,12 @@
 .diplomas .project-img-real {
     width: 100%;
 }
+
+.iplogger {
+    display: flex;
+    gap: 20px;
+}
+
+.iplogger .project-img-real {
+    width: 100%;
+}
